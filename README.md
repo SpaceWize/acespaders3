@@ -23,7 +23,7 @@ Four ideas, deliberately capped. Everything else on the page is static, and that
 contrast is what signals the hierarchy.
 
 1. **Pinned hero sequence** (`.hero`, `heroChoreography()` + `fluidHero()`) — the stage
-   pins for ~3 viewport heights while the headline beats are driven off scroll position,
+   pins for two viewport heights while the headline beats are driven off scroll position,
    over a live fluid surface. The page scrolls normally; input is never hijacked. The pin
    runs only where `(min-width: 901px) and (pointer: fine) and
    (prefers-reduced-motion: no-preference)`; everywhere else the same markup renders as an
@@ -65,49 +65,76 @@ on two alternating displacement buffers:
 cur[i] = ((((prev[i-1] + prev[i+1] + prev[i-w] + prev[i+w]) >> 1) - cur[i]) * DAMP) | 0;
 ```
 
-Buffers swap every step.
+Buffers swap every step. Rendering refracts a source texture by the local slope
+(`getImageData` once for the texture, `putImageData` each frame), and the same slope
+drives a hard linear highlight — on a near-black field the wave reads through its
+highlight, not its displacement.
 
-**Rendering does not use a pixel buffer**, and that's deliberate. The original approach
-refracted a source texture with `getImageData`/`putImageData` at the simulation's own
-resolution, then let CSS stretch it — which meant a 5× upscale at 1440px and 8.5× at
-2560px. Everything smeared, and the bigger the display the worse it looked.
+**Every value here is tuned energetic on purpose, and that is the whole design.** This
+surface has been softened twice and both times it stopped reading as liquid. A gentler
+pass (30Hz, `DAMP` 0.985, `MAX_OFF` 7, `xo * 3`) flattened it into embossed metal, and a
+later attempt to fix that with a Blinn-Phong specular made it worse in a different way —
+an exponent-16 lobe swings from dark to peak across a tiny change in angle, so
+neighbouring cells land far apart and the ~5× CSS upscale turned every one of those jumps
+into a visible block. Measured: 0.93 mean cell-to-cell roughness against 0.03 for
+refraction alone. **Do not soften this again, and do not replace `sh = xo * 5` with a
+sharper lighting model.** The crispness *is* the water.
 
-Instead: the gradient and key light are **CSS on `.hero__stage`** (resolution-independent
-and free), and the canvas draws **only the points**, at full device resolution, each one
-displaced by sampling the wave field bilinearly. Cost scales with star count rather than
-screen area, so the simulation can stay coarse and cheap while the visible output stays
-pin-sharp at any size. Measured at 1600×950: ~1000 stars, 1981×1188 backing store, frame
-intervals steady at 7.8ms median / 8.6ms worst.
+Measured on the same drop, same 285×180 grid, crisp against the gentle tuning:
+
+| at 1.5s | crisp | gentle |
+|---|---|---|
+| peak highlight | **45** | 21 |
+| distorted cells | **10,570** | 3,414 |
+| ring span | **133 cells** | 73 |
+| mean bend | **0.61** | 0.16 |
+
+By 3s the crisp ring has crossed 224 of 285 cells and still carries a 30-level highlight;
+the gentle one stalls at 105 cells and fades to 9.
+
+**On sharpness:** the canvas backing store *is* the simulation grid, and CSS stretches it,
+so the browser's bilinear upscale softens the result — more so the larger the display
+(~5× at 1440px, ~8.5× at 2560px). That softness is what keeps the refraction reading as
+liquid rather than as pixels. If you ever want it crisper, the single knob is the
+grid-width cap in `build()`; raising it sharpens at roughly quadratic cost.
 
 | Knob | Value | Why |
 |---|---|---|
-| Grid width | `≤300`, `cssWidth / 5` | ~50k cells, and the sim can stay coarse because nothing is upscaled from it — see below |
-| `DISP` / `MAX_DISP` | `0.16` / `34px` | how far a point travels per unit of slope, capped so a heavy drop bends light rather than teleporting it |
-| `LIFT` | `0.0045` | brightness and size gain on a crest. This is the caustic, and it's what makes a passing wave read as water rather than drifting dust |
-| Timestep | fixed **30Hz** accumulator | the wave front travels exactly one cell per step, so the step rate *is* the wave speed — 30Hz reads as a slow swell. Fixed rather than per-frame because damping and propagation are both per-step, so raw rAF would run 2.4× faster on a 144Hz display |
-| `DAMP` | `0.985` per step | ~0.64/sec, so a drop breathes out over several seconds instead of snapping back |
-| `MAX_OFF` | `7` cells | raw offsets from a heavy drop run to tens of cells, which samples garbage instead of refracting |
-| Specular | `xo * 3` | brightness from slope; higher and the wave shouts |
-| Trail | radius 2, weight 18 | coalesced to one injection per step and interpolated along the path, so a fast sweep leaves a line not dots |
-| Click | radius 6, weight 180 | the heavy drop |
-| Ambient | radius 5, weight 22, every 2.8–6.4s | wide and shallow, not small and sharp — the same energy reads as a swell rather than a plink. Measured >200× quieter than a click |
+| Grid width | `≤300`, `cssWidth / 5` | ~50k cells; the canvas backing store *is* the grid, and CSS stretches it, so the browser's bilinear upscale does the softening for free |
+| Timestep | fixed **60Hz** accumulator | the wave front travels exactly one cell per step, so the step rate *is* the wave speed — 60Hz is what makes a drop read as a splash. Fixed rather than per-frame because damping and propagation are both per-step, so raw rAF would run 2.4× faster on a 144Hz display |
+| `DAMP` | `0.99` per step | rings persist ~4s and keep expanding. Below ~0.985 they stop reading as water |
+| `MAX_OFF` | `9` cells | raw offsets from a 500-weight drop reach ~60 cells, which samples garbage instead of refracting. 9 is the most the texture takes while still bending the lattice hard enough to read as water |
+| Highlight | `sh = xo * 5` | hard and linear on purpose. Peaks at ±45 on 0-255 — this is the crispness, and softening it is what flattened the surface twice |
+| Trail | radius 2, weight 30 | coalesced to one injection per step and interpolated along the path, so a fast sweep leaves a line not dots |
+| Click | radius 6, weight 500 | the heavy drop |
+| Ambient | radius 3, weight 90, every 1.4–6.4s | small and sharp, scaled against the click — a real drop, not a swell, or the surface stops reading as liquid when nobody is touching it |
 
-To make it calmer still, lower `DROP_W` and `TRAIL_W` first; to slow it further, raise the
-`STEP` divisor. Don't reach for `DAMP` — below ~0.98 the rings stop reading as water.
+If it ever needs to be calmer, lower `DROP_W` and `TRAIL_W` first and leave everything
+else alone — those cost the least character per unit of calm. Reaching for `STEP`,
+`DAMP`, `MAX_OFF` or the `xo * 5` multiplier is what kills the liquid read.
 
-The field is a scatter of fine gold points over a warm charcoal ground with one key light
-high-right. Star positions come from a seeded LCG, so a resize reflows the field instead
-of reshuffling it, and brightness falls off with distance from the key light.
+The texture is a warm charcoal field with one key light high-right and a lattice of gold
+hairlines and points. The lattice is the point: straight lines are what make refraction
+legible — you read the wave by how the grid bends.
 
 It pauses on `visibilitychange` and when the hero scrolls out of view, resamples the
 buffers on resize so live waves survive it, and under `prefers-reduced-motion` renders
-the texture once with no loop and no listeners. Pointer events pass through the canvas —
+the texture once with no loop and no listeners (flat water, so `xo` is zero everywhere and
+what you get is the clean lattice). Pointer events pass through the canvas —
 the listeners sit on `.hero__stage`, so the CTAs stay clickable (and still splash).
 
 `.hero__scrim` is two layers: a fixed left-side bed that guarantees the headline a dark
 surface no matter what the water is doing, and a `::after` atmosphere that deepens with
-scroll. Worst-case measured contrast for the gold eyebrow, with the surface fully
-agitated, is 6.6:1.
+scroll.
+
+The scrim ramp is load-bearing with the crisp water underneath. The eyebrow's *text* runs
+to ~49% of the width (the element is wider, but the glyphs stop there), and the old ramp
+had thinned to `.28` by then — measured against the real glyph boxes with twelve
+simultaneous 500-weight drops directly beneath, 12px gold fell to **4.08:1**, under the
+4.5 floor. Deepening the mid-left to `.90 / .74 @34% / .22 @62% / 0 @80%` brings it to
+**5.48:1**, with the headline at 3.81:1 against a 3:1 requirement. The right side still
+drops away fast, so the key light and the ripples stay fully open. Fix legibility here,
+not by softening the water.
 
 ## Imagery
 

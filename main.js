@@ -104,77 +104,74 @@
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    var DAMP = 0.985;         // waves dissipate instead of ringing forever
-    var TRAIL_R = 2, TRAIL_W = 18;    // pointer trail
-    var DROP_R = 6, DROP_W = 180;     // click impact
+    /* Tuned for a live, crisp surface rather than a calm one. Every value here
+       is deliberately energetic: the liquid read comes from fast propagation,
+       long-lived rings and a hard specular, and softening any of them is what
+       previously flattened this into embossed metal. */
+    var DAMP = 0.99;          // rings persist ~4s and keep expanding
+    var TRAIL_R = 2, TRAIL_W = 30;    // pointer trail
+    var DROP_R = 6, DROP_W = 500;     // click impact
     // The wave front travels exactly one cell per step, so the step rate is
-    // the wave speed. 30Hz reads as a slow swell rather than a splash.
-    var STEP = 1000 / 30;
-    var DISP = 0.16;          // css px of star travel per unit of height slope
-    var MAX_DISP = 34;        // px, so a heavy drop bends light instead of teleporting it
-    var LIFT = 0.0045;        // brightness/size gain on a crest — the caustic
+    // the wave speed. 60Hz is what makes a drop read as a splash.
+    var STEP = 1000 / 60;
+    // Raw offsets from a 500-weight drop reach ~60 cells on a 285-wide grid,
+    // which samples garbage instead of refracting. 9 is the most the texture
+    // takes while still bending the lattice hard enough to read as water.
+    var MAX_OFF = 9;
 
-    var W = 0, H = 0;                 // simulation grid
-    var cw = 0, ch = 0, dpr = 1;      // canvas, in CSS px
+    var W = 0, H = 0;
     var cur = null, prev = null;      // the two displacement buffers
-    var stars = null, sprite = null;
+    var src = null;                   // source texture pixels
+    var img = null, out = null;       // destination ImageData
     var raf = null, onScreen = true, nextAmbient = 0;
     var ptr = null, lastPtr = null;
     var acc = 0, lastT = 0;
 
-    /* ---- the field ------------------------------------------------------
-       Only the points live on the canvas — the gradient and key light are CSS,
-       so they cost nothing and never pixelate. Drawing points rather than
-       refracting a pixel buffer is what keeps this sharp on a large display:
-       cost scales with star count, not screen area, so the canvas can run at
-       full device resolution while the simulation stays coarse and cheap. */
-    function makeSprite() {
-      var D = 24, s = document.createElement('canvas');
-      s.width = D; s.height = D;
-      var g = s.getContext('2d');
-      var rg = g.createRadialGradient(D / 2, D / 2, 0, D / 2, D / 2, D / 2);
-      rg.addColorStop(0, 'rgba(255,247,231,1)');
-      rg.addColorStop(0.16, 'rgba(251,224,170,.94)');
-      rg.addColorStop(0.42, 'rgba(228,180,106,.30)');
-      rg.addColorStop(1, 'rgba(228,180,106,0)');
-      g.fillStyle = rg; g.fillRect(0, 0, D, D);
-      return s;
-    }
+    /* ---- source texture -------------------------------------------------
+       Warm charcoal field, one key light high-right, and a lattice of gold
+       hairlines and points. The lattice is the point: straight lines are
+       what make refraction legible — you read the wave by how the grid bends. */
+    function texture(w, h) {
+      var t = document.createElement('canvas');
+      t.width = w; t.height = h;
+      var g = t.getContext('2d', { willReadFrequently: true });
+      var lx = w * 0.74, ly = h * 0.04, lr = w * 0.78;
 
-    // Seeded, so a resize reflows the field instead of reshuffling it.
-    function lcg(seed) {
-      var s = seed >>> 0;
-      return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
-    }
+      var base = g.createLinearGradient(0, 0, w * 0.4, h);
+      base.addColorStop(0, '#241E17');
+      base.addColorStop(0.45, '#100E0C');
+      base.addColorStop(1, '#050505');
+      g.fillStyle = base; g.fillRect(0, 0, w, h);
 
-    function makeStars() {
-      var rand = lcg(0x5EEDACE);
-      var n = Math.max(160, Math.min(1500, Math.round(cw * ch / 1500)));
-      var lx = 0.74, ly = 0.06, lr = 0.86;     // key light, normalised
-      var a = new Float32Array(n * 4);
-      for (var i = 0; i < n; i++) {
-        var x = rand(), y = rand(), t = rand();
-        var dx = x - lx, dy = (y - ly) * 0.62;
-        var fall = 1 - Math.min(1, Math.sqrt(dx * dx + dy * dy) / lr);
-        a[i * 4] = x;
-        a[i * 4 + 1] = y;
-        a[i * 4 + 2] = 0.7 + t * t * t * 3.4;   // mostly fine, a few anchors
-        a[i * 4 + 3] = (0.16 + rand() * 0.60) * (0.20 + 0.80 * fall * fall);
+      var key = g.createRadialGradient(lx, ly, 0, lx, ly, lr);
+      key.addColorStop(0, 'rgba(240,198,122,.46)');
+      key.addColorStop(0.30, 'rgba(232,184,104,.14)');
+      key.addColorStop(0.62, 'rgba(190,146,80,.04)');
+      key.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = key; g.fillRect(0, 0, w, h);
+
+      var step = Math.max(6, Math.round(w / 24));
+      function fall(x, y) {                       // brightness near the key light
+        var d = Math.sqrt((x - lx) * (x - lx) + (y - ly) * (y - ly)) / lr;
+        return Math.max(0, 1 - d * 1.15);
       }
-      return a;
-    }
-
-    /* Bilinear so a star drifts smoothly instead of snapping between cells. */
-    function sampleH(buf, x, y) {
-      if (x < 0) x = 0; else if (x > W - 1) x = W - 1;
-      if (y < 0) y = 0; else if (y > H - 1) y = H - 1;
-      var x0 = x | 0, y0 = y | 0;
-      var x1 = x0 + 1 > W - 1 ? W - 1 : x0 + 1;
-      var y1 = y0 + 1 > H - 1 ? H - 1 : y0 + 1;
-      var fx = x - x0, fy = y - y0, i0 = y0 * W, i1 = y1 * W;
-      var top = buf[i0 + x0] + (buf[i0 + x1] - buf[i0 + x0]) * fx;
-      var bot = buf[i1 + x0] + (buf[i1 + x1] - buf[i1 + x0]) * fx;
-      return top + (bot - top) * fy;
+      g.lineWidth = 1;
+      for (var x = step; x < w; x += step) {       // vertical hairlines
+        var vg = g.createLinearGradient(x, 0, x, h);
+        vg.addColorStop(0, 'rgba(233,196,132,' + (0.24 * fall(x, 0)).toFixed(3) + ')');
+        vg.addColorStop(1, 'rgba(233,196,132,' + (0.05 * fall(x, h)).toFixed(3) + ')');
+        g.strokeStyle = vg;
+        g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, h); g.stroke();
+      }
+      for (var gy = step; gy < h; gy += step) {    // points on the lattice
+        for (var gx = step; gx < w; gx += step) {
+          var a = 0.62 * fall(gx, gy);
+          if (a <= 0.01) continue;
+          g.fillStyle = 'rgba(244,206,140,' + a.toFixed(3) + ')';
+          g.beginPath(); g.arc(gx, gy, 1.15, 0, 6.2832); g.fill();
+        }
+      }
+      return g.getImageData(0, 0, w, h).data;
     }
 
     /* ---- sizing: keep existing waves across a resize -------------------- */
@@ -192,24 +189,20 @@
 
     function build() {
       var r = canvas.getBoundingClientRect();
-      var ncw = Math.max(1, Math.round(r.width)), nch = Math.max(1, Math.round(r.height));
-      var ndpr = Math.min(2, window.devicePixelRatio || 1);
-      if (ncw === cw && nch === ch && ndpr === dpr) return;
-
-      cw = ncw; ch = nch; dpr = ndpr;
-      // Backing store at device resolution: the points stay pin-sharp on a
-      // retina or 4K display instead of being upscaled from the sim grid.
-      canvas.width = Math.round(cw * dpr);
-      canvas.height = Math.round(ch * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var cw = Math.max(1, r.width), ch = Math.max(1, r.height);
+      var nw = Math.max(160, Math.min(300, Math.round(cw / 5)));
+      var nh = Math.max(100, Math.round(nw * ch / cw));
+      if (nw === W && nh === H) return;
 
       var ow = W, oh = H;
-      W = Math.max(120, Math.min(300, Math.round(cw / 5)));
-      H = Math.max(80, Math.round(W * ch / cw));
+      W = nw; H = nh;
+      canvas.width = W; canvas.height = H;
       cur = resample(cur, ow, oh, W, H);
       prev = resample(prev, ow, oh, W, H);
-      if (!sprite) sprite = makeSprite();
-      stars = makeStars();
+      src = texture(W, H);
+      img = ctx.createImageData(W, H);
+      out = img.data;
+      out.set(src);              // borders are never rewritten, so seed them
       render(cur);
     }
 
@@ -253,12 +246,13 @@
     }
 
     /* Sparse ambient drops so the surface still breathes with no pointer
-       (and on touch devices, where mousemove never fires). Wide and shallow,
-       not small and sharp — same energy reads as a swell rather than a plink. */
+       (and on touch devices, where mousemove never fires). Small and sharp,
+       scaled against the 500-weight click — a real drop, not a swell, or the
+       surface stops reading as liquid when nobody is touching it. */
     function ambient(now) {
       if (now < nextAmbient) return;
-      nextAmbient = now + 2800 + Math.random() * 3600;
-      drop(5 + Math.random() * (W - 10) | 0, 5 + Math.random() * (H - 10) | 0, 5, 22);
+      nextAmbient = now + 1400 + Math.random() * 5000;
+      drop(5 + Math.random() * (W - 10) | 0, 5 + Math.random() * (H - 10) | 0, 3, 90);
     }
 
     /* ---- simulation + render -------------------------------------------- */
@@ -274,35 +268,30 @@
       }
     }
 
-    /* Each point is refracted individually: the local slope moves it, the local
-       height brightens and swells it. That second term is the caustic, and it
-       is what makes a passing wave read as water rather than as drifting dust. */
     function render(buf) {
-      if (!stars) return;
-      ctx.clearRect(0, 0, cw, ch);
-      var n = stars.length >> 2, gw = W - 1, gh = H - 1;
-      for (var i = 0; i < n; i++) {
-        var o = i << 2;
-        var nx = stars[o], ny = stars[o + 1], sz = stars[o + 2], al = stars[o + 3];
-        var gx = nx * gw, gy = ny * gh;
-
-        var h = sampleH(buf, gx, gy);
-        var ox = (sampleH(buf, gx - 1, gy) - sampleH(buf, gx + 1, gy)) * DISP;
-        var oy = (sampleH(buf, gx, gy - 1) - sampleH(buf, gx, gy + 1)) * DISP;
-        if (ox > MAX_DISP) ox = MAX_DISP; else if (ox < -MAX_DISP) ox = -MAX_DISP;
-        if (oy > MAX_DISP) oy = MAX_DISP; else if (oy < -MAX_DISP) oy = -MAX_DISP;
-
-        var e = 1 + h * LIFT;
-        if (e < 0.35) e = 0.35; else if (e > 2.3) e = 2.3;
-        var a = al * e;
-        if (a <= 0.012) continue;                  // skip what would not show
-        if (a > 1) a = 1;
-
-        var d = sz * (0.74 + 0.26 * e) * 3.2;      // sprite is mostly halo
-        ctx.globalAlpha = a;
-        ctx.drawImage(sprite, nx * cw + ox - d / 2, ny * ch + oy - d / 2, d, d);
+      var w = W;
+      for (var y = 1; y < H - 1; y++) {
+        var row = y * w;
+        for (var x = 1; x < w - 1; x++) {
+          var i = row + x;
+          var xo = (buf[i - 1] - buf[i + 1]) >> 3;   // refraction offset
+          var yo = (buf[i - w] - buf[i + w]) >> 3;
+          if (xo > MAX_OFF) xo = MAX_OFF; else if (xo < -MAX_OFF) xo = -MAX_OFF;
+          if (yo > MAX_OFF) yo = MAX_OFF; else if (yo < -MAX_OFF) yo = -MAX_OFF;
+          var sx = x + xo, sy = y + yo;
+          if (sx < 0) sx = 0; else if (sx >= w) sx = w - 1;
+          if (sy < 0) sy = 0; else if (sy >= H) sy = H - 1;
+          var s = (sy * w + sx) << 2, d = i << 2;
+          // On a near-black field the wave reads through its highlight, not
+          // its displacement, so the slope drives brightness as well. This is
+          // a hard, linear term on purpose — it is the crispness.
+          var sh = xo * 5;
+          out[d] = src[s] + sh;                      // clamped by Uint8ClampedArray
+          out[d + 1] = src[s + 1] + sh;
+          out[d + 2] = src[s + 2] + sh;
+        }
       }
-      ctx.globalAlpha = 1;
+      ctx.putImageData(img, 0, 0);
     }
 
     /* Fixed timestep. Damping and propagation are both per-step, so without
@@ -336,9 +325,9 @@
 
     build();
 
-    /* Resize is bound before the reduced-motion guard: the points are drawn at
-       device resolution, so a stale backing store stretches them visibly. This
-       has to run even when the water doesn't. */
+    /* Resize is bound before the reduced-motion guard: build() regenerates the
+       texture for the new grid, and that has to happen even when the water
+       doesn't run. */
     var resizeRaf = null;
     window.addEventListener('resize', function () {
       if (resizeRaf) return;

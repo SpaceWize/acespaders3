@@ -212,20 +212,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__stage{
   position:relative;min-height:100svh;overflow:hidden;
   display:flex;align-items:flex-end;
-  /* The field itself lives here rather than on the canvas: gradients in CSS are
-     resolution-independent and free, so nothing about the background can
-     pixelate on a large display. The canvas draws only the points. */
-  background:
-    radial-gradient(58% 64% at 74% 2%,
-      rgba(240,198,122,.30) 0%,rgba(232,184,104,.09) 34%,
-      rgba(190,146,80,.02) 62%,rgba(0,0,0,0) 100%),
-    radial-gradient(124% 112% at 50% 46%,rgba(0,0,0,0) 28%,rgba(0,0,0,.58) 100%),
-    linear-gradient(168deg,#241E17 0%,#100E0C 46%,#050505 100%);
+  /* what you see before the first canvas paint, and if canvas is unavailable */
+  background:radial-gradient(78% 86% at 74% 4%,#2A2219,#0C0B0A 58%,#060505 100%);
 }
 
-/* The points. Backing store runs at device resolution (see build() in main.js)
-   so they stay sharp at any screen size. Pointer events pass through — the
-   listeners live on the stage, which keeps the CTAs clickable. */
+/* The fluid surface. Backing store is the simulation grid (≤300px wide) and
+   CSS stretches it, so the browser's bilinear upscale does the softening for
+   free. Pointer events pass through — the listeners live on the stage. */
 .hero__fluid{
   position:absolute;top:0;left:0;width:100%;height:100%;
   display:block;pointer-events:none;z-index:0;
@@ -236,8 +229,13 @@ button,input,select,textarea{font:inherit;color:inherit}
    light and the ripples are fully visible. */
 .hero__scrim{
   position:absolute;inset:0;pointer-events:none;z-index:1;
+  /* The eyebrow's text runs to ~49% of the width, where the old ramp had
+     already thinned to .28 — with the crisp water underneath, 12px gold fell
+     to 4.08:1 there. Deepened through the mid-left so the type is protected
+     without touching the water: past 62% it still drops away fast, keeping the
+     key light and the ripples fully open on the right. */
   background:linear-gradient(90deg,
-    rgba(5,5,4,.88) 0%,rgba(5,5,4,.62) 30%,rgba(5,5,4,.12) 58%,rgba(5,5,4,0) 78%);
+    rgba(5,5,4,.90) 0%,rgba(5,5,4,.74) 34%,rgba(5,5,4,.22) 62%,rgba(5,5,4,0) 80%);
 }
 .hero__scrim::after{
   content:"";position:absolute;inset:0;
