@@ -64,7 +64,7 @@
   /* choreography defaults = the settled, non-cinematic end state */
   --o1:1; --o2:1; --o3:1; --o4:1;
   --y1:0px; --y2:0px; --y3:0px; --y4:0px;
-  --scrim:.66; --cue:0; --cy:0px;
+  --scrim:.66; --cue:0; --cy:0px; --fade:1;
 }
 
 /* ── RESET / BASE ───────────────────────────────────────────── */
@@ -250,6 +250,9 @@ button,input,select,textarea{font:inherit;color:inherit}
   max-width:var(--maxw);margin-inline:auto;
   padding:9rem var(--gutter) clamp(4rem,9vh,7rem);
   transform:translate3d(0,var(--cy),0);
+  /* Composed by ~52% of travel, then handed back to the water. Defaults to 1
+     so the non-cinematic path never strands the copy invisible. */
+  opacity:var(--fade);
 }
 .hero__eyebrow{
   opacity:var(--o1);transform:translate3d(0,var(--y1),0);
@@ -672,7 +675,7 @@ button,input,select,textarea{font:inherit;color:inherit}
    room to breathe, and motion not refused by the visitor.      */
 @media (min-width:901px) and (pointer:fine){
   @media (prefers-reduced-motion:no-preference){
-    .js .hero{height:200vh}
+    .js .hero{height:150vh}
     .js .hero__stage{position:sticky;top:0;height:100vh;min-height:100vh}
     .js .hero__cue{display:flex}
     .js .hero__content{padding-top:7rem;padding-bottom:clamp(4.5rem,10vh,7rem)}

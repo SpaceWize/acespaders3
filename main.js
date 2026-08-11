@@ -47,17 +47,23 @@
       var p = travel > 0 ? clamp(-top / travel, 0, 1) : 0;
       var s = stage.style;
 
-      s.setProperty('--scrim', (0.40 + 0.32 * seg(p, 0.18, 0.84)).toFixed(3));
+      s.setProperty('--scrim', (0.40 + 0.32 * seg(p, 0.14, 0.80)).toFixed(3));
 
       // Beat 1 is the landing frame — it is never animated in, so the page
       // never opens on an empty screen. Scroll composes beats 2–4 beneath it.
-      setBeat(2, seg(p, 0.14, 0.34));   // headline, line two
-      setBeat(3, seg(p, 0.42, 0.60));   // identity paragraph
-      setBeat(4, seg(p, 0.54, 0.70));   // calls to action
+      // Compressed into the first half of travel so the whole sequence has
+      // finished well before the copy starts leaving.
+      setBeat(2, seg(p, 0.10, 0.26));   // headline, line two
+      setBeat(3, seg(p, 0.28, 0.42));   // identity paragraph
+      setBeat(4, seg(p, 0.38, 0.52));   // calls to action
 
       // the block rides low while it is still half-empty, then rises
-      s.setProperty('--cy', ((1 - easeOut(seg(p, 0.08, 0.66))) * 320).toFixed(1) + 'px');
+      s.setProperty('--cy', ((1 - easeOut(seg(p, 0.06, 0.50))) * 320).toFixed(1) + 'px');
       s.setProperty('--cue', (1 - seg(p, 0, 0.05)).toFixed(3));
+
+      // Then it clears out and hands the frame back to the water, so the hero
+      // resolves to the surface alone rather than snapping away mid-sentence.
+      s.setProperty('--fade', (1 - easeOut(seg(p, 0.62, 0.96))).toFixed(3));
     }
 
     function onScroll() {
@@ -67,7 +73,7 @@
     function reset() {
       // hand every custom property back to its settled CSS default
       ['--o2', '--o3', '--o4', '--y2', '--y3', '--y4',
-        '--scrim', '--cue', '--cy'].forEach(function (k) { stage.style.removeProperty(k); });
+        '--scrim', '--cue', '--cy', '--fade'].forEach(function (k) { stage.style.removeProperty(k); });
     }
 
     function sync() {
@@ -118,6 +124,14 @@
     // which samples garbage instead of refracting. 9 is the most the texture
     // takes while still bending the lattice hard enough to read as water.
     var MAX_OFF = 9;
+    /* Caustics. Light converges where the surface is concave, and concavity is
+       the Laplacian of the height field — so this is the real cause of the
+       bright banding on a pool floor, not a fake overlay. It is a *linear*
+       operator, which is why it survives the ~5x CSS upscale where the earlier
+       exponent-16 specular did not: no term here swings dark-to-peak between
+       neighbouring cells. Brightens harder than it dims, because converged
+       light is what you notice. */
+    var CAUS = 0.045, CAUS_UP = 30, CAUS_DN = 15;
 
     var W = 0, H = 0;
     var cur = null, prev = null;      // the two displacement buffers
@@ -286,9 +300,12 @@
           // its displacement, so the slope drives brightness as well. This is
           // a hard, linear term on purpose — it is the crispness.
           var sh = xo * 5;
-          out[d] = src[s] + sh;                      // clamped by Uint8ClampedArray
-          out[d + 1] = src[s + 1] + sh;
-          out[d + 2] = src[s + 2] + sh;
+          // Caustic from the local curvature, warm because the light is gold.
+          var cz = -(buf[i - 1] + buf[i + 1] + buf[i - w] + buf[i + w] - 4 * buf[i]) * CAUS;
+          if (cz > CAUS_UP) cz = CAUS_UP; else if (cz < -CAUS_DN) cz = -CAUS_DN;
+          out[d] = src[s] + sh + cz;                 // clamped by Uint8ClampedArray
+          out[d + 1] = src[s + 1] + sh + cz * 0.93;
+          out[d + 2] = src[s + 2] + sh + cz * 0.76;
         }
       }
       ctx.putImageData(img, 0, 0);

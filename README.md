@@ -23,7 +23,9 @@ Four ideas, deliberately capped. Everything else on the page is static, and that
 contrast is what signals the hierarchy.
 
 1. **Pinned hero sequence** (`.hero`, `heroChoreography()` + `fluidHero()`) — the stage
-   pins for two viewport heights while the headline beats are driven off scroll position,
+   pins across `150vh` — half a viewport height of travel — while the beats compose off
+   scroll position, all four landing by 52% and then fading out from 62% to 96% so the
+   hero resolves to the bare water instead of snapping away mid-sentence. Driven
    over a live fluid surface. The page scrolls normally; input is never hijacked. The pin
    runs only where `(min-width: 901px) and (pointer: fine) and
    (prefers-reduced-motion: no-preference)`; everywhere else the same markup renders as an
@@ -105,6 +107,7 @@ grid-width cap in `build()`; raising it sharpens at roughly quadratic cost.
 | `DAMP` | `0.99` per step | rings persist ~4s and keep expanding. Below ~0.985 they stop reading as water |
 | `MAX_OFF` | `9` cells | raw offsets from a 500-weight drop reach ~60 cells, which samples garbage instead of refracting. 9 is the most the texture takes while still bending the lattice hard enough to read as water |
 | Highlight | `sh = xo * 5` | hard and linear on purpose. Peaks at ±45 on 0-255 — this is the crispness, and softening it is what flattened the surface twice |
+| `CAUS` | `0.045`, clamped `+30/-15` | caustics from `-∇²h`. Light converges where the surface is concave, so this is the real cause of pool-floor banding, not a fake overlay. Linear, which is why it survives the upscale: measured, it left the max cell-to-cell jump unchanged (131→125) while adding structure. Costs 0.32ms/frame |
 | Trail | radius 2, weight 30 | coalesced to one injection per step and interpolated along the path, so a fast sweep leaves a line not dots |
 | Click | radius 6, weight 500 | the heavy drop |
 | Ambient | radius 3, weight 90, every 1.4–6.4s | small and sharp, scaled against the click — a real drop, not a swell, or the surface stops reading as liquid when nobody is touching it |
@@ -127,14 +130,30 @@ the listeners sit on `.hero__stage`, so the CTAs stay clickable (and still splas
 surface no matter what the water is doing, and a `::after` atmosphere that deepens with
 scroll.
 
-The scrim ramp is load-bearing with the crisp water underneath. The eyebrow's *text* runs
-to ~49% of the width (the element is wider, but the glyphs stop there), and the old ramp
-had thinned to `.28` by then — measured against the real glyph boxes with twelve
-simultaneous 500-weight drops directly beneath, 12px gold fell to **4.08:1**, under the
-4.5 floor. Deepening the mid-left to `.90 / .74 @34% / .22 @62% / 0 @80%` brings it to
-**5.48:1**, with the headline at 3.81:1 against a 3:1 requirement. The right side still
-drops away fast, so the key light and the ripples stay fully open. Fix legibility here,
-not by softening the water.
+The scrim ramp is load-bearing with the crisp water underneath, and it is where legibility
+gets fixed — never by softening the water.
+
+Measure it against **real glyph boxes**, which means walking to the text nodes. Both
+obvious shortcuts lie: `.hero__eyebrow` is a wide flex row whose text stops at 49% of the
+width, and `.hero__line` is `display:block`, so `getClientRects` on the element returns
+full-width line boxes. Either one samples background far to the right of any actual
+letterform and reports a contrast failure that is not real.
+
+Measured that way, under realistic interaction — a click, a mouse sweep, ambient only,
+four rapid clicks:
+
+| | eyebrow (needs 4.5) | headline (needs 3.0) |
+|---|---|---|
+| one click | 5.54 – 6.29 | 3.80 – 4.66 |
+| four clicks | 5.41 – 5.54 | 4.66 – 5.18 |
+| mouse sweep / ambient | 5.54 | 4.66 |
+
+Under a deliberately unreachable stress case (fourteen simultaneous 500-weight drops
+packed along the text band) the headline dips to 2.73. That is a pre-existing exposure,
+not a caustic artefact — the same case reads 2.87 *with* caustics, which are
+contrast-neutral because their negative lobe offsets the positive one. The cause is that
+`"You need someone"` runs to 80% of the width, where the ramp has reached zero. If you
+ever lengthen a headline line past ~65%, re-measure.
 
 ## Imagery
 
