@@ -49,6 +49,12 @@ Everything below is scaffolding. Each spot is marked `REPLACE:` in the source.
   Do not ship them; they are not real reviews.
 - **Contact** — `hello@acespaders.com` appears in the header of the contact block, the
   footer, and `TO` in `main.js`.
+- **Address** — placeholder (`000 Example Row, Suite 000 · Placeholder City, ST 00000`)
+  in three places: the appointment plaque, the contact block's `Office` row, and the
+  footer. Replace all three, or drop the street address and keep a city line if you'd
+  rather not publish one.
+- **Appointment terms** — the days ("Tuesday to Thursday") and concurrency ("three
+  engagements at once") in the `#appointment` section are assumptions, not facts.
 
 ## The hero fluid surface
 
@@ -59,14 +65,25 @@ on two alternating displacement buffers:
 cur[i] = ((((prev[i-1] + prev[i+1] + prev[i-w] + prev[i+w]) >> 1) - cur[i]) * DAMP) | 0;
 ```
 
-Buffers swap every step. Rendering refracts a source texture by the local slope
-(`getImageData` once for the texture, `putImageData` each frame), and the same slope
-drives a specular term — on a near-black field the wave reads through its highlight, not
-its displacement.
+Buffers swap every step.
+
+**Rendering does not use a pixel buffer**, and that's deliberate. The original approach
+refracted a source texture with `getImageData`/`putImageData` at the simulation's own
+resolution, then let CSS stretch it — which meant a 5× upscale at 1440px and 8.5× at
+2560px. Everything smeared, and the bigger the display the worse it looked.
+
+Instead: the gradient and key light are **CSS on `.hero__stage`** (resolution-independent
+and free), and the canvas draws **only the points**, at full device resolution, each one
+displaced by sampling the wave field bilinearly. Cost scales with star count rather than
+screen area, so the simulation can stay coarse and cheap while the visible output stays
+pin-sharp at any size. Measured at 1600×950: ~1000 stars, 1981×1188 backing store, frame
+intervals steady at 7.8ms median / 8.6ms worst.
 
 | Knob | Value | Why |
 |---|---|---|
-| Grid width | `≤300`, `cssWidth / 5` | ~50k cells; the canvas backing store *is* the grid, and CSS stretches it, so the browser's bilinear upscale does the softening for free |
+| Grid width | `≤300`, `cssWidth / 5` | ~50k cells, and the sim can stay coarse because nothing is upscaled from it — see below |
+| `DISP` / `MAX_DISP` | `0.16` / `34px` | how far a point travels per unit of slope, capped so a heavy drop bends light rather than teleporting it |
+| `LIFT` | `0.0045` | brightness and size gain on a crest. This is the caustic, and it's what makes a passing wave read as water rather than drifting dust |
 | Timestep | fixed **30Hz** accumulator | the wave front travels exactly one cell per step, so the step rate *is* the wave speed — 30Hz reads as a slow swell. Fixed rather than per-frame because damping and propagation are both per-step, so raw rAF would run 2.4× faster on a 144Hz display |
 | `DAMP` | `0.985` per step | ~0.64/sec, so a drop breathes out over several seconds instead of snapping back |
 | `MAX_OFF` | `7` cells | raw offsets from a heavy drop run to tens of cells, which samples garbage instead of refracting |
@@ -78,9 +95,9 @@ its displacement.
 To make it calmer still, lower `DROP_W` and `TRAIL_W` first; to slow it further, raise the
 `STEP` divisor. Don't reach for `DAMP` — below ~0.98 the rings stop reading as water.
 
-The texture is a warm charcoal field with one key light high-right and a lattice of gold
-hairlines and points. The lattice is the point: straight lines are what make refraction
-legible — you read the wave by how the grid bends.
+The field is a scatter of fine gold points over a warm charcoal ground with one key light
+high-right. Star positions come from a seeded LCG, so a resize reflows the field instead
+of reshuffling it, and brightness falls off with distance from the key light.
 
 It pauses on `visibilitychange` and when the hero scrolls out of view, resamples the
 buffers on resize so live waves survive it, and under `prefers-reduced-motion` renders

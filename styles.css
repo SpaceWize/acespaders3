@@ -212,13 +212,20 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__stage{
   position:relative;min-height:100svh;overflow:hidden;
   display:flex;align-items:flex-end;
-  /* what you see before the first canvas paint, and if canvas is unavailable */
-  background:radial-gradient(78% 86% at 74% 4%,#2A2219,#0C0B0A 58%,#060505 100%);
+  /* The field itself lives here rather than on the canvas: gradients in CSS are
+     resolution-independent and free, so nothing about the background can
+     pixelate on a large display. The canvas draws only the points. */
+  background:
+    radial-gradient(58% 64% at 74% 2%,
+      rgba(240,198,122,.30) 0%,rgba(232,184,104,.09) 34%,
+      rgba(190,146,80,.02) 62%,rgba(0,0,0,0) 100%),
+    radial-gradient(124% 112% at 50% 46%,rgba(0,0,0,0) 28%,rgba(0,0,0,.58) 100%),
+    linear-gradient(168deg,#241E17 0%,#100E0C 46%,#050505 100%);
 }
 
-/* The fluid surface. Backing store is the simulation grid (≤300px wide) and
-   CSS stretches it, so the browser's bilinear upscale does the softening for
-   free. Pointer events pass through — the listeners live on the stage. */
+/* The points. Backing store runs at device resolution (see build() in main.js)
+   so they stay sharp at any screen size. Pointer events pass through — the
+   listeners live on the stage, which keeps the CTAs clickable. */
 .hero__fluid{
   position:absolute;top:0;left:0;width:100%;height:100%;
   display:block;pointer-events:none;z-index:0;
@@ -533,7 +540,55 @@ button,input,select,textarea{font:inherit;color:inherit}
 .quote__by span:first-child{color:var(--on-dark);font-weight:600}
 .quote__by span:last-child{color:var(--on-dark-mute)}
 
-/* ═══ 10. FINAL CTA ═══════════════════════════════════════════ */
+/* ═══ 10. BY APPOINTMENT ═════════════════════════════════════
+   The one centred block on the page. Everything else is left-aligned
+   editorial, so centring reads as a formal notice — a gate you pass
+   through on the way to the form rather than another pitch. */
+.appt{background:var(--ink-800);border-top:1px solid var(--line-dark)}
+.plaque{
+  position:relative;max-width:62rem;margin-inline:auto;text-align:center;
+  padding:clamp(2.5rem,5vw,4rem) clamp(1.5rem,4vw,3.5rem);
+  border:1px solid var(--line-dark);
+}
+/* engraved corner ticks, opposite corners only */
+.plaque::before,.plaque::after{
+  content:"";position:absolute;width:20px;height:20px;border:0 solid var(--gold);
+}
+.plaque::before{top:-1px;left:-1px;border-top-width:1px;border-left-width:1px}
+.plaque::after{bottom:-1px;right:-1px;border-bottom-width:1px;border-right-width:1px}
+
+.plaque__brow{justify-content:center;margin-bottom:var(--sp-2)}
+.plaque__h{margin-bottom:var(--sp-3)}
+.plaque__lede{
+  max-width:52ch;margin-inline:auto;
+  font-size:var(--fs-lead);color:var(--on-dark-mute);
+}
+
+.terms{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);
+  margin-top:clamp(2.25rem,4vw,3rem);text-align:left;
+}
+.terms>div{padding-top:var(--sp-2);border-top:1px solid var(--line-dark)}
+.terms dt{
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:.5rem;
+}
+.terms dd{margin:0;font-size:var(--fs-sm);color:var(--on-dark-mute)}
+
+.addr{
+  margin-top:clamp(2.25rem,4vw,3rem);padding-top:var(--sp-3);
+  border-top:1px solid var(--line-dark);
+  font-style:normal;font-size:var(--fs-sm);line-height:1.75;color:var(--on-dark);
+}
+.addr__label{
+  display:block;margin-bottom:.6rem;
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--on-dark-mute);
+}
+
+/* ═══ 11. FINAL CTA ═══════════════════════════════════════════ */
 .cta{background:var(--cream);color:var(--on-light)}
 .cta__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
   gap:clamp(2.5rem,5vw,5rem);align-items:start}
@@ -591,6 +646,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand__mark--lg svg{width:20px;height:20px}
 .foot__word{font:400 1.35rem/1 var(--f-display);letter-spacing:.02em;color:var(--on-dark)}
 .foot__tag{margin-top:.6rem;font-size:var(--fs-sm);color:var(--on-dark-mute);max-width:26ch}
+.foot__addr{
+  margin-top:var(--sp-3);font-style:normal;
+  font-size:var(--fs-sm);line-height:1.8;color:var(--on-dark-mute);
+}
+.foot__addr-note{
+  display:inline-block;margin-top:.35rem;
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);
+}
 .foot__h{
   font-family:var(--f-util);font-variation-settings:"wdth" 112;
   font-size:var(--fs-label);font-weight:600;letter-spacing:.16em;text-transform:uppercase;
@@ -609,7 +674,7 @@ button,input,select,textarea{font:inherit;color:inherit}
    room to breathe, and motion not refused by the visitor.      */
 @media (min-width:901px) and (pointer:fine){
   @media (prefers-reduced-motion:no-preference){
-    .js .hero{height:320vh}
+    .js .hero{height:200vh}
     .js .hero__stage{position:sticky;top:0;height:100vh;min-height:100vh}
     .js .hero__cue{display:flex}
     .js .hero__content{padding-top:7rem;padding-bottom:clamp(4.5rem,10vh,7rem)}
@@ -627,6 +692,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   .also__grid{grid-template-columns:repeat(2,1fr)}
   .quotes{grid-template-columns:1fr;gap:var(--sp-2)}
   .quote{max-width:none}
+  .terms{grid-template-columns:1fr;gap:var(--sp-3)}
 }
 
 @media (max-width:900px){
