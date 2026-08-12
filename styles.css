@@ -775,45 +775,33 @@ button,input,select,textarea{font:inherit;color:inherit}
   }
 }
 
-/* ── SUBPAGES ────────────────────────────────────────────────
-   Placeholder info pages. Dark field, one centred column, a single
-   route back to the contact form on the home page. Deliberately plain:
-   the copy is not written yet, so nothing here should look finished. */
-.subpage{
-  min-height:100vh;
-  display:flex;flex-direction:column;
-  background:var(--ink-900);color:var(--on-dark);
+/* ── SERVICE PAGES ───────────────────────────────────────────
+   Exactly the home hero and nothing else: same stage, same water, same
+   type ramp. One white title where the home page runs two lines, so the
+   description inherits the room the gold line used to take.
+
+   heroChoreography() is deliberately NOT wired here — these pages carry no
+   [data-hero], so it returns early. That matters: the choreography derives
+   its progress from (hero height - viewport height), which is zero on a
+   non-scrolling page, so it would drive every beat to p=0 and leave the
+   copy at opacity 0. With it unbound, the :root defaults (--o1..--o4 = 1)
+   hold everything visible at rest. fluidHero() only needs [data-fluid] and
+   takes the canvas's parent as its stage, so the water still runs. */
+.js .hero--page{height:auto}          /* beats the 200vh cinematic rule */
+.hero--page .hero__stage{min-height:100svh}
+/* No fixed header on these, so the home hero's 9rem top pad is dead space. */
+.hero--page .hero__content{padding-top:clamp(4.5rem,11vh,7rem)}
+/* Service names run longer than the home headline and are not hand-broken. */
+.hero--page .hero__h1{max-width:20ch;margin-bottom:var(--sp-3)}
+.hero--page .hero__sub{max-width:62ch}
+
+.hero__back{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--on-dark-mute);
+  margin-bottom:var(--sp-4);
+  transition:color var(--t-fast) var(--ease);
 }
-.subpage__main{flex:1 0 auto;padding-block:clamp(7rem,14vh,10rem) var(--sp-sec)}
-.subpage__inner{max-width:56ch;margin-inline:auto;padding-inline:var(--gutter)}
-.subpage__back{
-  display:inline-flex;align-items:center;gap:.5rem;
-  font-family:var(--f-util);font-size:var(--fs-label);
-  letter-spacing:.14em;text-transform:uppercase;
-  color:var(--on-dark-mute);text-decoration:none;
-  margin-bottom:var(--sp-3);
-  transition:color var(--t-mid) var(--ease);
-}
-.subpage__back svg{width:16px;height:16px;transform:rotate(180deg)}
-.subpage__back:hover{color:var(--gold)}
-.subpage__h1{
-  font-family:var(--f-display);font-size:clamp(2.2rem,5.2vw,3.6rem);
-  line-height:1.02;letter-spacing:-.01em;margin-bottom:var(--sp-3);
-}
-/* The placeholder line. Reads as scaffolding on purpose. */
-.subpage__soon{
-  font-size:var(--fs-lead);color:var(--on-dark-mute);
-  padding:var(--sp-3);
-  border:1px dashed var(--line-dark);
-  background:var(--ink-800);
-}
-.subpage__cta{margin-top:var(--sp-4)}
-.subpage__foot{
-  border-top:1px solid var(--line-dark);
-  padding-block:var(--sp-3);
-}
-.subpage__foot .wrap{
-  display:flex;flex-wrap:wrap;gap:var(--sp-2);
-  align-items:center;justify-content:space-between;
-}
-.subpage__foot p{font-size:var(--fs-sm);color:var(--on-dark-mute)}
+.hero__back svg{width:1.1em;height:1.1em;flex:none;transform:rotate(180deg)}
+.hero__back:hover{color:var(--gold)}
