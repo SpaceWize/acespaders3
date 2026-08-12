@@ -676,6 +676,32 @@ button,input,select,textarea{font:inherit;color:inherit}
 .foot__grid a{font-size:var(--fs-sm);color:var(--on-dark-mute);
   transition:color var(--t-fast) var(--ease)}
 .foot__grid a:hover{color:var(--on-dark)}
+/* Brand-column pull quote. Sits under the wordmark, so it stays quiet —
+   the gold is spent on the column headings, not here. */
+.foot__quote{
+  margin-top:var(--sp-3);max-width:30ch;
+  font-size:var(--fs-sm);line-height:1.7;font-style:italic;
+  color:var(--on-dark-mute);
+  padding-left:var(--sp-2);border-left:2px solid var(--line-dark);
+}
+.foot__quote-by{
+  margin-top:.5rem;padding-left:calc(var(--sp-2) + 2px);
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);letter-spacing:.14em;text-transform:uppercase;
+  color:#8B857C;
+}
+/* Full-width closing line, above the copyright rule. */
+.foot__line{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-2);
+  padding-bottom:var(--sp-3);
+  font-size:var(--fs-lead);line-height:1.5;font-style:italic;
+  color:var(--on-dark);
+}
+.foot__line-by{
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-style:normal;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);
+}
 .foot__base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-2);
   padding-top:var(--sp-3);border-top:1px solid var(--line-dark);
   font-size:.8125rem;color:#8B857C}
