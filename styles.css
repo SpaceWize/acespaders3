@@ -505,6 +505,16 @@ button,input,select,textarea{font:inherit;color:inherit}
   margin-bottom:.4rem;
 }
 .alsotile p{font-size:var(--fs-sm);color:var(--on-dark-mute)}
+/* The whole tile is the hit area. The <a> carries no visual of its own — the
+   lift and border still live on .alsotile:hover, so the tile looks identical. */
+/* Tiles stretch to the tallest in their row, so the <a> has to be told to
+   fill or the bottom of a short tile is dead space that looks clickable. */
+.alsotile{padding:0;display:flex}
+.alsotile__link{
+  flex:1;padding:var(--sp-3);
+  color:inherit;text-decoration:none;
+}
+.alsotile__link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 /* MOTION #4 — hover only, and only where hover is real */
 @media (hover:hover){
@@ -738,3 +748,46 @@ button,input,select,textarea{font:inherit;color:inherit}
     transition-duration:.01ms!important;scroll-behavior:auto!important;
   }
 }
+
+/* ── SUBPAGES ────────────────────────────────────────────────
+   Placeholder info pages. Dark field, one centred column, a single
+   route back to the contact form on the home page. Deliberately plain:
+   the copy is not written yet, so nothing here should look finished. */
+.subpage{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  background:var(--ink-900);color:var(--on-dark);
+}
+.subpage__main{flex:1 0 auto;padding-block:clamp(7rem,14vh,10rem) var(--sp-sec)}
+.subpage__inner{max-width:56ch;margin-inline:auto;padding-inline:var(--gutter)}
+.subpage__back{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--f-util);font-size:var(--fs-label);
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--on-dark-mute);text-decoration:none;
+  margin-bottom:var(--sp-3);
+  transition:color var(--t-mid) var(--ease);
+}
+.subpage__back svg{width:16px;height:16px;transform:rotate(180deg)}
+.subpage__back:hover{color:var(--gold)}
+.subpage__h1{
+  font-family:var(--f-display);font-size:clamp(2.2rem,5.2vw,3.6rem);
+  line-height:1.02;letter-spacing:-.01em;margin-bottom:var(--sp-3);
+}
+/* The placeholder line. Reads as scaffolding on purpose. */
+.subpage__soon{
+  font-size:var(--fs-lead);color:var(--on-dark-mute);
+  padding:var(--sp-3);
+  border:1px dashed var(--line-dark);
+  background:var(--ink-800);
+}
+.subpage__cta{margin-top:var(--sp-4)}
+.subpage__foot{
+  border-top:1px solid var(--line-dark);
+  padding-block:var(--sp-3);
+}
+.subpage__foot .wrap{
+  display:flex;flex-wrap:wrap;gap:var(--sp-2);
+  align-items:center;justify-content:space-between;
+}
+.subpage__foot p{font-size:var(--fs-sm);color:var(--on-dark-mute)}
