@@ -23,13 +23,35 @@ Four ideas, deliberately capped. Everything else on the page is static, and that
 contrast is what signals the hierarchy.
 
 1. **Pinned hero sequence** (`.hero`, `heroChoreography()` + `fluidHero()`) — the stage
-   pins across `150vh` — half a viewport height of travel — while the beats compose off
-   scroll position, all four landing by 52% and then fading out from 62% to 96% so the
-   hero resolves to the bare water instead of snapping away mid-sentence. Driven
-   over a live fluid surface. The page scrolls normally; input is never hijacked. The pin
+   pins across `200vh` — one viewport height of travel — while the beats compose off
+   scroll position over a live fluid surface, then hold at full strength until release.
+
+   **The beat spacing is the whole effect, and it is bounded from below.** A beat needs
+   roughly 120px of scroll — two wheel notches — to register as an event. Squeezed to
+   `150vh`, each beat got 56–64px, which is *less than one notch*: the entire reveal fired
+   inside a single flick and read as if there were no reveal at all. At `200vh` each beat
+   gets ~160px on an 800px viewport, then 256px of hold. If you shorten the hero again,
+   this is what breaks first — and it breaks silently, because nothing errors.
+
+   **There is no scroll-driven fade-out, and that was a deliberate reversal.** One was
+   built (`--fade` on `.hero__content`) and it read as the page breaking rather than as an
+   exit — copy dimming while the hero still fills the screen looks like a rendering fault,
+   not choreography. The pin scrolling away under the next section is already the exit. The
+   variable and its CSS binding are gone rather than pinned to 1, so there is nothing left
+   to accidentally re-drive.
+
+   The page scrolls normally; input is never hijacked. The pin
    runs only where `(min-width: 901px) and (pointer: fine) and
    (prefers-reduced-motion: no-preference)`; everywhere else the same markup renders as an
    ordinary static hero, with the fluid still running.
+
+   Crossing that breakpoint is a **race**, and it has bitten once. `frame()` is scheduled
+   through `requestAnimationFrame`, and a queued frame outlives the listener that scheduled
+   it — so a resize past 901px ran `reset()` and *then* let the stale frame rewrite every
+   property from the narrow layout, where travel is a couple of dozen pixels, `p` slams to
+   1, and `--fade` lands on 0. Result: a static hero with invisible copy. `reset()` now
+   cancels the pending frame and `frame()` bails when `cine.matches` is false. Keep both;
+   either alone leaves a window open.
 2. **Ordered stagger on the flagship four** (`.four`, `flagshipReveal()`) — one
    IntersectionObserver trigger, then CSS walks the items via `--i` at 620ms apart with a
    720ms settle, and the gold spine draws down beside them. Slow and even, no overshoot.

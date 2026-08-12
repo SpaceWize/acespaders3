@@ -33,6 +33,7 @@
     );
     var ticking = false;
     var bound = false;
+    var rafId = 0;
 
     function setBeat(n, t) {
       var e = easeOut(t);
@@ -42,6 +43,13 @@
 
     function frame() {
       ticking = false;
+      rafId = 0;
+      /* A queued frame outlives the listener that scheduled it. Without this
+         guard, a resize across the 901px line lands reset() first and then
+         this callback rewrites every property from the narrow layout — where
+         travel is a couple of dozen pixels, so p slams straight to 1 and the
+         static hero inherits an end-state it should never have animated to. */
+      if (!cine.matches) return;
       var top = hero.getBoundingClientRect().top;
       var travel = hero.offsetHeight - window.innerHeight;
       var p = travel > 0 ? clamp(-top / travel, 0, 1) : 0;
@@ -51,29 +59,33 @@
 
       // Beat 1 is the landing frame — it is never animated in, so the page
       // never opens on an empty screen. Scroll composes beats 2–4 beneath it.
-      // Compressed into the first half of travel so the whole sequence has
-      // finished well before the copy starts leaving.
-      setBeat(2, seg(p, 0.10, 0.26));   // headline, line two
-      setBeat(3, seg(p, 0.28, 0.42));   // identity paragraph
-      setBeat(4, seg(p, 0.38, 0.52));   // calls to action
+      // Each beat needs roughly a couple of wheel notches to read as an event;
+      // at ~60px it fires faster than the input that drives it and the whole
+      // reveal collapses into a single flick. Sized against the 200vh hero.
+      setBeat(2, seg(p, 0.08, 0.28));   // headline, line two
+      setBeat(3, seg(p, 0.30, 0.50));   // identity paragraph
+      setBeat(4, seg(p, 0.48, 0.68));   // calls to action
 
       // the block rides low while it is still half-empty, then rises
-      s.setProperty('--cy', ((1 - easeOut(seg(p, 0.06, 0.50))) * 320).toFixed(1) + 'px');
+      s.setProperty('--cy', ((1 - easeOut(seg(p, 0.05, 0.66))) * 320).toFixed(1) + 'px');
       s.setProperty('--cue', (1 - seg(p, 0, 0.05)).toFixed(3));
 
-      // Then it clears out and hands the frame back to the water, so the hero
-      // resolves to the surface alone rather than snapping away mid-sentence.
-      s.setProperty('--fade', (1 - easeOut(seg(p, 0.62, 0.96))).toFixed(3));
+      // Composed from 0.68 to the release, and it stays that way. There is
+      // deliberately no fade-out: the copy holds at full strength until the
+      // pin lets go and the section scrolls off under the next one.
     }
 
     function onScroll() {
-      if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+      if (!ticking) { ticking = true; rafId = requestAnimationFrame(frame); }
     }
 
     function reset() {
+      // drop any frame already in flight, or it will repopulate what we clear
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      ticking = false;
       // hand every custom property back to its settled CSS default
       ['--o2', '--o3', '--o4', '--y2', '--y3', '--y4',
-        '--scrim', '--cue', '--cy', '--fade'].forEach(function (k) { stage.style.removeProperty(k); });
+        '--scrim', '--cue', '--cy'].forEach(function (k) { stage.style.removeProperty(k); });
     }
 
     function sync() {
@@ -118,12 +130,20 @@
     var TRAIL_R = 2, TRAIL_W = 30;    // pointer trail
     var DROP_R = 6, DROP_W = 500;     // click impact
     // The wave front travels exactly one cell per step, so the step rate is
-    // the wave speed. 60Hz is what makes a drop read as a splash.
-    var STEP = 1000 / 60;
+    // the wave speed. 60Hz read as a hair too fast on a longer look; 52Hz
+    // (+2.6ms/step) takes the edge off without losing the splash.
+    var STEP = 1000 / 52;
     // Raw offsets from a 500-weight drop reach ~60 cells on a 285-wide grid,
     // which samples garbage instead of refracting. 9 is the most the texture
     // takes while still bending the lattice hard enough to read as water.
     var MAX_OFF = 9;
+    /* The simulation border is never written by simulate() below, so it sits
+       fixed at height 0 forever — a rigid wall. A wave that reaches it
+       reflects back at full strength instead of dissipating, which reads as
+       the surface "bouncing off the sides." This band absorbs it instead:
+       extra damping ramping from 10% at the wall to none 16 cells in, applied
+       only to that thin border strip so the interior physics are untouched. */
+    var EDGE_BAND = 16, EDGE_MIN = 0.90;
     /* Caustics. Light converges where the surface is concave, and concavity is
        the Laplacian of the height field — so this is the real cause of the
        bright banding on a pool floor, not a fake overlay. It is a *linear*
@@ -282,6 +302,29 @@
       }
     }
 
+    /* Absorbing border, applied to cur (the state simulate() just wrote) right
+       before the swap. Four thin strips rather than a per-cell distance check
+       over the whole grid, so this costs proportional to the band, not the
+       grid — the interior loop above stays exactly as fast as it was. */
+    function dampEdges() {
+      var w = W, band = EDGE_BAND;
+      for (var y = 1; y <= band && y < H - 1; y++) {
+        var f = EDGE_MIN + (1 - EDGE_MIN) * (y - 1) / band;
+        var rowT = y * w, rowB = (H - 1 - y) * w;
+        for (var x = 1; x < w - 1; x++) {
+          cur[rowT + x] = (cur[rowT + x] * f) | 0;
+          cur[rowB + x] = (cur[rowB + x] * f) | 0;
+        }
+      }
+      for (var x2 = 1; x2 <= band && x2 < w - 1; x2++) {
+        var fx = EDGE_MIN + (1 - EDGE_MIN) * (x2 - 1) / band;
+        for (var y2 = band + 1; y2 < H - 1 - band; y2++) {
+          cur[y2 * w + x2] = (cur[y2 * w + x2] * fx) | 0;
+          cur[y2 * w + (w - 1 - x2)] = (cur[y2 * w + (w - 1 - x2)] * fx) | 0;
+        }
+      }
+    }
+
     function render(buf) {
       var w = W;
       for (var y = 1; y < H - 1; y++) {
@@ -325,6 +368,7 @@
         injectPointer();
         ambient(now);
         simulate();
+        dampEdges();
         var t = cur; cur = prev; prev = t;          // swap the buffers
       }
       if (stepped) render(prev);                    // post-swap, prev is newest
