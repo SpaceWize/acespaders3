@@ -424,28 +424,34 @@ Activity locations are private and only shared with group members.
         <input id="f-org" name="org" type="text" autocomplete="organization">
         <p class="err" id="e-org" data-err></p>
       </div>
-      <div class="field">
-        <label for="f-door">Regarding</label>
-        <select id="f-door" name="door" required data-msg="Pick a door." aria-describedby="e-door">
-          <option value="">Choose all that apply</option>
-          <option>The Invested Aces Mastermind</option>
-          <option>A Commitment</option>
-          <option>A Meeting</option>
-          <option>Project Management</option>
-          <option>Representation</option>
-          <option>Facilitation</option>
-          <option>Advisory</option>
-          <option>On-Location Scouting</option>
-          <option>Premium Pickup & Transport</option>
-          <option>Public Speaking</option>
-          <option>Business Scaling</option>
-          <option>Crisis Navigation</option>
-          <option>Boots on the Ground</option>
-          <option>Strategic Marketing</option>
-          <option>Health & Lifestyle Mindset Adjustments</option>
-          <option>Other</option>
-        </select>
-        <p class="err" id="e-door" data-err></p>
+      <!-- Checkboxes, not a select: an enquiry is regularly about more than one
+           service, and a single-select silently forces the visitor to drop the
+           rest. Validity is "at least one ticked", which no individual input can
+           express, so main.js validates this as a group via [data-checkgroup]. -->
+      <div class="field field--full">
+        <fieldset class="checks" data-checkgroup data-msg="Pick a door.">
+          <legend>Regarding</legend>
+          <p class="hint" id="hint-door">Choose all that apply</p>
+          <ul class="checks__grid">
+            <li><label class="check"><input type="checkbox" name="door" value="The Invested Aces Mastermind" aria-describedby="hint-door e-door"><span>The Invested Aces Mastermind</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="A Commitment"><span>A Commitment</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="A Meeting"><span>A Meeting</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Project Management"><span>Project Management</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Representation"><span>Representation</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Facilitation"><span>Facilitation</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Advisory"><span>Advisory</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="On-Location Scouting"><span>On-Location Scouting</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Premium Pickup &amp; Transport"><span>Premium Pickup &amp; Transport</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Public Speaking"><span>Public Speaking</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Business Scaling"><span>Business Scaling</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Crisis Navigation"><span>Crisis Navigation</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Boots on the Ground"><span>Boots on the Ground</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Strategic Marketing"><span>Strategic Marketing</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Health &amp; Lifestyle Mindset Adjustments"><span>Health &amp; Lifestyle Mindset Adjustments</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Other"><span>Other</span></label></li>
+          </ul>
+          <p class="err" id="e-door" data-err></p>
+        </fieldset>
       </div>
       <div class="field field--full">
         <label for="f-what">Description/ Additional Info</label>

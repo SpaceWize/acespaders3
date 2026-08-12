@@ -588,8 +588,32 @@
       return true;
     }
 
+    /* "Regarding" is a checkbox group: valid when at least one box is ticked.
+       No individual input can express that, and validate() above would mark
+       every unticked box as a failed required field, so the group is checked
+       as a unit and its inputs are skipped by the per-field wiring. */
+    var group = form.querySelector('[data-checkgroup]');
+    var boxes = group ? [].slice.call(group.querySelectorAll('input[type="checkbox"]')) : [];
+
+    function validateGroup() {
+      if (!group) return true;
+      var any = boxes.some(function (b) { return b.checked; });
+      var e = group.querySelector('[data-err]');
+      group.classList.toggle('is-bad', !any);
+      if (e) e.textContent = any ? '' : (group.getAttribute('data-msg') || 'Pick at least one.');
+      boxes.forEach(function (b) { b.setAttribute('aria-invalid', any ? 'false' : 'true'); });
+      return any;
+    }
+
     var fields = [].slice.call(form.querySelectorAll('input, select, textarea'));
     fields.forEach(function (f) {
+      if (f.type === 'checkbox') {
+        // only ever clears an error already showing — never scolds mid-choice
+        f.addEventListener('change', function () {
+          if (group && group.classList.contains('is-bad')) validateGroup();
+        });
+        return;
+      }
       f.addEventListener('blur', function () { validate(f); });
       f.addEventListener('input', function () {
         if (fieldOf(f).classList.contains('is-bad')) validate(f);
@@ -598,9 +622,18 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var ok = true, first = null;
+      var ok = true, first = null, groupChecked = false;
+      // walked in DOM order, so focus lands on the first problem down the page
       fields.forEach(function (f) {
-        if (!validate(f)) { ok = false; if (!first) first = f; }
+        var good;
+        if (f.type === 'checkbox') {
+          if (groupChecked) return;              // the whole group counts once
+          groupChecked = true;
+          good = validateGroup();
+        } else {
+          good = validate(f);
+        }
+        if (!good) { ok = false; if (!first) first = f; }
       });
       if (!ok) {
         status.textContent = 'Fix the highlighted fields and send again.';
@@ -609,12 +642,15 @@
       }
 
       var d = new FormData(form);
-      var subject = 'Application — ' + (d.get('door') || 'Ace Spaders');
+      // getAll, not get — "door" is now multi-valued, and a single-value read
+      // would silently drop every selection after the first.
+      var doors = d.getAll('door').join(', ');
+      var subject = 'Application — ' + (doors || 'Ace Spaders');
       var body = [
         'Name: ' + d.get('name'),
         'Email: ' + d.get('email'),
         'Organization: ' + (d.get('org') || '—'),
-        'Door: ' + d.get('door'),
+        'Door: ' + doors,
         'Timeline: ' + d.get('when'),
         '',
         "What's stuck:",

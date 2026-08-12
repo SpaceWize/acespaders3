@@ -644,6 +644,38 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hint{font-size:.8125rem;color:var(--on-light-mute)}
 .err{font-size:.8125rem;color:#A32E1E;min-height:0}
 .err:empty{display:none}
+
+/* "Regarding" checkbox group. Everything above is written for text controls —
+   full width, 50px tall, cream fill, uppercase micro-type labels — so the boxes
+   and their option labels have to out-specify all of it rather than inherit it. */
+.checks{border:0;padding:0;margin:0;min-width:0}
+.checks legend{
+  padding:0;
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--on-light-mute);
+}
+.checks .hint{margin:.45rem 0 .8rem}
+.checks__grid{
+  display:grid;gap:.1rem var(--sp-3);
+  grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+}
+/* .field label is (0,1,1); this needs to beat it, hence the descendant form. */
+.field .check{
+  display:flex;align-items:flex-start;gap:.6rem;
+  padding:.35rem 0;cursor:pointer;
+  font-family:var(--f-body);font-size:var(--fs-sm);font-weight:400;
+  letter-spacing:0;text-transform:none;color:var(--on-light);
+}
+.field .check input[type="checkbox"]{
+  width:1.05rem;height:1.05rem;min-height:0;flex:none;
+  margin:.15rem 0 0;padding:0;
+  background:none;border:0;
+  accent-color:var(--gold-ink);cursor:pointer;
+}
+@media (hover:hover){.field .check:hover{color:var(--gold-ink)}}
+.checks.is-bad .check input[type="checkbox"]{outline:2px solid #A32E1E;outline-offset:2px}
+.checks .err{margin-top:.6rem}
 .form__foot{grid-column:1/-1;display:grid;gap:.75rem}
 .form__status{font-size:var(--fs-sm);color:var(--on-light-mute)}
 .form__status:empty{display:none}
