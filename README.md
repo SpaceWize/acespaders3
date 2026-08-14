@@ -57,8 +57,14 @@ contrast is what signals the hierarchy.
    720ms settle, and the gold spine draws down beside them. Slow and even, no overshoot.
 3. **Proof counters** (`.stats`, `proofCounters()`) — one count-up, once, on scroll-in.
    Reduced motion gets the final numbers with no animation.
-4. **Hover lift on the secondary services** (`.alsotile`) — shadow lift plus a thin gold
-   edge, inside `@media (hover: hover)` only. No scroll-triggered entrance here on purpose.
+4. **Hover on the secondary services** (`.alsotile`, `alsoTileBloom()`) — shadow lift and a
+   thin gold edge, plus a hidden gold-spade pattern (`assets/images/gold-spades.jpg`)
+   revealed through a small radial spotlight that trails the cursor, lerped in a rAF loop —
+   the same mechanic as the hero's own cursor-tracked bloom, scaled to card size. Still one
+   system: the hover lift gained a second move rather than the budget gaining a fifth entry.
+   Inside `@media (hover: hover)` only, and off entirely under reduced motion — both the CSS
+   mask and the JS listener drop out, not just the visible result. No scroll-triggered
+   entrance here on purpose.
 
 ## Before launch — replace these
 

@@ -5,7 +5,7 @@
         fluidHero()         the hero's fluid surface, part of the same idea
      2. flagshipReveal()    ordered stagger on the core four
      3. proofCounters()     one count-up, once
-     4. (CSS only)          hover lift on secondary services
+     4. (CSS) + alsoTileBloom()   hover lift, plus a cursor-trailing reveal
    ═══════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -127,7 +127,14 @@
        long-lived rings and a hard specular, and softening any of them is what
        previously flattened this into embossed metal. */
     var DAMP = 0.99;          // rings persist ~4s and keep expanding
-    var TRAIL_R = 2, TRAIL_W = 30;    // pointer trail
+    // TRAIL_W raised from 30: the spade reveal is slope-driven, and slope is
+    // sharpest at a moving disturbance's leading edge and falls off fast
+    // behind it — so a weak trail reveals a thin bright line at the cursor
+    // tip and almost nothing in its wake, which is what reads as "barely
+    // visible" while just hovering. A stronger trail keeps more energy (and
+    // more visible spade) in that wake. Per the README, this is the correct
+    // knob for more/less of this effect — leave STEP/DAMP/MAX_OFF/xo*5 alone.
+    var TRAIL_R = 2, TRAIL_W = 55;    // pointer trail
     var DROP_R = 6, DROP_W = 500;     // click impact
     // The wave front travels exactly one cell per step, so the step rate is
     // the wave speed. 60Hz read as a hair too fast on a longer look; 52Hz
@@ -135,7 +142,7 @@
     var STEP = 1000 / 52;
     // Raw offsets from a 500-weight drop reach ~60 cells on a 285-wide grid,
     // which samples garbage instead of refracting. 9 is the most the texture
-    // takes while still bending the lattice hard enough to read as water.
+    // takes while still bending the plate hard enough to read as water.
     var MAX_OFF = 9;
     /* The simulation border is never written by simulate() below, so it sits
        fixed at height 0 forever — a rigid wall. A wave that reaches it
@@ -161,10 +168,20 @@
     var ptr = null, lastPtr = null;
     var acc = 0, lastT = 0;
 
+    /* The spade plate shows through in proportion to how bent the surface is,
+       so calm water is just the gold field and a ripple opens a window onto
+       the spades beneath it. Driven by slope rather than height on purpose:
+       slope is where refraction actually happens, so the reveal lands exactly
+       on the visible structure of the wave instead of on its crests. */
+    var SPADE_GAIN = 0.30, SPADE_MAX = 0.90;
+    var SPADES_SRC = 'assets/images/gold-spades.jpg';
+    var spadeImg = null, spd = null;
+
     /* ---- source texture -------------------------------------------------
-       Warm charcoal field, one key light high-right, and a lattice of gold
-       hairlines and points. The lattice is the point: straight lines are
-       what make refraction legible — you read the wave by how the grid bends. */
+       Warm charcoal field with one key light high-right, and nothing else.
+       The lattice that used to live here is gone: the spade plate below is
+       what the wave bends now, and unlike the lattice it is only present
+       where the water is actually moving. */
     function texture(w, h) {
       var t = document.createElement('canvas');
       t.width = w; t.height = h;
@@ -184,29 +201,49 @@
       key.addColorStop(1, 'rgba(0,0,0,0)');
       g.fillStyle = key; g.fillRect(0, 0, w, h);
 
-      var step = Math.max(6, Math.round(w / 24));
-      function fall(x, y) {                       // brightness near the key light
-        var d = Math.sqrt((x - lx) * (x - lx) + (y - ly) * (y - ly)) / lr;
-        return Math.max(0, 1 - d * 1.15);
-      }
-      g.lineWidth = 1;
-      for (var x = step; x < w; x += step) {       // vertical hairlines
-        var vg = g.createLinearGradient(x, 0, x, h);
-        vg.addColorStop(0, 'rgba(233,196,132,' + (0.24 * fall(x, 0)).toFixed(3) + ')');
-        vg.addColorStop(1, 'rgba(233,196,132,' + (0.05 * fall(x, h)).toFixed(3) + ')');
-        g.strokeStyle = vg;
-        g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, h); g.stroke();
-      }
-      for (var gy = step; gy < h; gy += step) {    // points on the lattice
-        for (var gx = step; gx < w; gx += step) {
-          var a = 0.62 * fall(gx, gy);
-          if (a <= 0.01) continue;
-          g.fillStyle = 'rgba(244,206,140,' + a.toFixed(3) + ')';
-          g.beginPath(); g.arc(gx, gy, 1.15, 0, 6.2832); g.fill();
-        }
-      }
       return g.getImageData(0, 0, w, h).data;
     }
+
+    /* The plate the ripples open onto. Cover-fit, never tiled — one large
+       image, so no repeat seam can ever land inside the frame. Multiplied by
+       the same key-light falloff as the field above, so a revealed spade sits
+       in the scene's lighting instead of glowing on top of it. */
+    function spadePlate(w, h) {
+      if (!spadeImg || !w || !h) return null;
+      var t = document.createElement('canvas');
+      t.width = w; t.height = h;
+      var g = t.getContext('2d', { willReadFrequently: true });
+      var lx = w * 0.74, ly = h * 0.04, lr = w * 0.78;
+
+      g.fillStyle = '#050505'; g.fillRect(0, 0, w, h);
+
+      var ir = spadeImg.naturalWidth / spadeImg.naturalHeight, cr = w / h;
+      var dw, dh;
+      if (ir > cr) { dh = h; dw = h * ir; } else { dw = w; dh = w / ir; }
+      g.drawImage(spadeImg, (w - dw) / 2, (h - dh) / 2, dw, dh);
+
+      g.globalCompositeOperation = 'multiply';
+      var kg = g.createRadialGradient(lx, ly, 0, lx, ly, lr);
+      kg.addColorStop(0, '#ffffff');
+      kg.addColorStop(0.55, '#8f8f8f');
+      kg.addColorStop(1, '#2e2e2e');
+      g.fillStyle = kg; g.fillRect(0, 0, w, h);
+      g.globalCompositeOperation = 'source-over';
+
+      return g.getImageData(0, 0, w, h).data;
+    }
+
+    /* Loaded once. Until it arrives the hero is simply the gold field with no
+       plate to reveal — render() skips the blend rather than waiting on it. */
+    (function () {
+      var im = new Image();
+      im.onload = function () {
+        spadeImg = im;
+        spd = spadePlate(W, H);
+        if (W && H && prev) render(prev);
+      };
+      im.src = SPADES_SRC;
+    })();
 
     /* ---- sizing: keep existing waves across a resize -------------------- */
     function resample(old, ow, oh, nw, nh) {
@@ -234,6 +271,7 @@
       cur = resample(cur, ow, oh, W, H);
       prev = resample(prev, ow, oh, W, H);
       src = texture(W, H);
+      spd = spadePlate(W, H);    // null until the image lands; render() copes
       img = ctx.createImageData(W, H);
       out = img.data;
       out.set(src);              // borders are never rewritten, so seed them
@@ -346,9 +384,24 @@
           // Caustic from the local curvature, warm because the light is gold.
           var cz = -(buf[i - 1] + buf[i + 1] + buf[i - w] + buf[i + w] - 4 * buf[i]) * CAUS;
           if (cz > CAUS_UP) cz = CAUS_UP; else if (cz < -CAUS_DN) cz = -CAUS_DN;
-          out[d] = src[s] + sh + cz;                 // clamped by Uint8ClampedArray
-          out[d + 1] = src[s + 1] + sh + cz * 0.93;
-          out[d + 2] = src[s + 2] + sh + cz * 0.76;
+
+          var r0 = src[s], g0 = src[s + 1], b0 = src[s + 2];
+          if (spd) {
+            // how bent this cell is; the plate is sampled at the refracted
+            // position too, so the spades bend with the water rather than
+            // showing through it flat
+            var amp = (xo < 0 ? -xo : xo) + (yo < 0 ? -yo : yo);
+            var m = amp * SPADE_GAIN;
+            if (m > SPADE_MAX) m = SPADE_MAX;
+            if (m > 0.002) {
+              r0 += (spd[s] - r0) * m;
+              g0 += (spd[s + 1] - g0) * m;
+              b0 += (spd[s + 2] - b0) * m;
+            }
+          }
+          out[d] = r0 + sh + cz;                     // clamped by Uint8ClampedArray
+          out[d + 1] = g0 + sh + cz * 0.93;
+          out[d + 2] = b0 + sh + cz * 0.76;
         }
       }
       ctx.putImageData(img, 0, 0);
@@ -443,6 +496,53 @@
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
     io.observe(list);
+  }
+
+  /* ── 4b. SECONDARY-SERVICE BLOOM ────────────────────────────────
+     Still motion #4, not a fifth system — the hover lift already there
+     (.alsotile:hover in styles.css) gains a second move: a hidden gold-
+     spade pattern revealed through a small radial spotlight that trails
+     the pointer, lerped in a rAF loop exactly like the hero's cursor-
+     tracked bloom in fluidHero()'s sibling project. Skipped entirely
+     under (hover:none) or reduced motion — see the matching CSS guard. */
+  function alsoTileBloom() {
+    if (reduce.matches || !window.matchMedia('(hover: hover)').matches) return;
+    var tiles = [].slice.call(document.querySelectorAll('.alsotile'));
+    if (!tiles.length) return;
+
+    tiles.forEach(function (tile) {
+      var bloom = tile.querySelector('.alsotile__bloom');
+      if (!bloom) return;
+      var raw = { x: -999, y: -999 };
+      var smooth = { x: -999, y: -999 };
+      var running = false;
+
+      function loop() {
+        smooth.x += (raw.x - smooth.x) * 0.22;
+        smooth.y += (raw.y - smooth.y) * 0.22;
+        bloom.style.setProperty('--mx', smooth.x.toFixed(1) + 'px');
+        bloom.style.setProperty('--my', smooth.y.toFixed(1) + 'px');
+        if (Math.abs(raw.x - smooth.x) > 0.4 || Math.abs(raw.y - smooth.y) > 0.4) {
+          requestAnimationFrame(loop);
+        } else {
+          running = false;
+        }
+      }
+      function kick() {
+        if (!running) { running = true; requestAnimationFrame(loop); }
+      }
+
+      tile.addEventListener('pointermove', function (e) {
+        var r = tile.getBoundingClientRect();
+        raw.x = e.clientX - r.left;
+        raw.y = e.clientY - r.top;
+        kick();
+      }, { passive: true });
+      tile.addEventListener('pointerleave', function () {
+        raw.x = -999; raw.y = -999;
+        kick();
+      });
+    });
   }
 
   /* ── 3. PROOF COUNTERS ─────────────────────────────────────────
@@ -672,6 +772,7 @@
     heroChoreography();
     fluidHero();
     flagshipReveal();
+    alsoTileBloom();
     proofCounters();
     header();
     navState();

@@ -509,12 +509,38 @@ button,input,select,textarea{font:inherit;color:inherit}
    lift and border still live on .alsotile:hover, so the tile looks identical. */
 /* Tiles stretch to the tallest in their row, so the <a> has to be told to
    fill or the bottom of a short tile is dead space that looks clickable. */
-.alsotile{padding:0;display:flex}
+.alsotile{padding:0;display:flex;position:relative;overflow:hidden}
 .alsotile__link{
   flex:1;padding:var(--sp-3);
   color:inherit;text-decoration:none;
+  position:relative;z-index:2;
 }
 .alsotile__link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* Same mechanic as the hero's cursor-trailing bloom, scaled to card size: a
+   hidden pattern revealed through a small radial mask that follows the
+   pointer, written to --mx/--my by main.js and lerped in a rAF loop. Still
+   MOTION #4 — this is the hover system gaining a second move, not a fifth
+   system on top of the site's four-motion budget. */
+.alsotile__bloom{
+  --mx:-999px; --my:-999px; --r:120px;
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  /* cover + no-repeat: the plate always fills the card, so a seam can never
+     appear at any card size — no tiling to align. The source is a wide crop
+     carrying ~5 spade columns (and none of the generator's watermarks), so
+     "scaled up" here means more of the pattern in frame, not one giant spade:
+     blowing up a single-period tile put the gaps between spades wider than
+     the card and the spotlight just lit empty black. */
+  background-image:url('assets/images/gold-spades.jpg');
+  background-repeat:no-repeat;background-position:center;
+  background-size:cover;
+  opacity:0;
+  -webkit-mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
+    #000 0%,#000 30%,rgba(0,0,0,.5) 62%,transparent 100%);
+  mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
+    #000 0%,#000 30%,rgba(0,0,0,.5) 62%,transparent 100%);
+  transition:opacity var(--t-mid) var(--ease);
+}
 
 /* MOTION #4 — hover only, and only where hover is real */
 @media (hover:hover){
@@ -525,6 +551,12 @@ button,input,select,textarea{font:inherit;color:inherit}
     box-shadow:0 18px 40px -22px rgba(0,0,0,.9);
   }
   .alsotile:hover .alsotile__ico svg{stroke:var(--gold)}
+  .alsotile:hover .alsotile__bloom{opacity:1}
+}
+/* No pointer to trail on touch, and prefers-reduced-motion drops the whole
+   cursor-follow move — same rule the hero's spotlight already follows. */
+@media (hover:none),(prefers-reduced-motion:reduce){
+  .alsotile__bloom{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   .alsotile:hover{transform:none}
