@@ -22,9 +22,10 @@ python -m http.server 8123
 Four ideas, deliberately capped. Everything else on the page is static, and that
 contrast is what signals the hierarchy.
 
-1. **Pinned hero sequence** (`.hero`, `heroChoreography()` + `fluidHero()`) — the stage
+1. **Pinned hero sequence** (`.hero`, `heroChoreography()` + `heroSpotlight()`) — the stage
    pins across `200vh` — one viewport height of travel — while the beats compose off
-   scroll position over a live fluid surface, then hold at full strength until release.
+   scroll position over a cursor-tracked spotlight, then hold at full strength until
+   release.
 
    **The beat spacing is the whole effect, and it is bounded from below.** A beat needs
    roughly 120px of scroll — two wheel notches — to register as an event. Squeezed to
@@ -43,7 +44,8 @@ contrast is what signals the hierarchy.
    The page scrolls normally; input is never hijacked. The pin
    runs only where `(min-width: 901px) and (pointer: fine) and
    (prefers-reduced-motion: no-preference)`; everywhere else the same markup renders as an
-   ordinary static hero, with the fluid still running.
+   ordinary static hero, with the spotlight still live — it has its own, wider gate (see
+   below), so a narrow-but-mouse-driven window still gets the light without the pin.
 
    Crossing that breakpoint is a **race**, and it has bitten once. `frame()` is scheduled
    through `requestAnimationFrame`, and a queued frame outlives the listener that scheduled
@@ -86,102 +88,48 @@ Everything below is scaffolding. Each spot is marked `REPLACE:` in the source.
 - **Appointment terms** — the days ("Tuesday to Thursday") and concurrency ("three
   engagements at once") in the `#appointment` section are assumptions, not facts.
 
-## The hero fluid surface
+## The hero spotlight
 
-`fluidHero()` in `main.js`. Classic 2D water propagation — the Hugo Elias algorithm —
-on two alternating displacement buffers:
+`heroSpotlight()` in `main.js`, styled by three layers in `styles.css`
+(`.hero__spades`, `.hero__glow`, `.hero__rim`) that all read `--mx` / `--my` / `--r` off
+`.hero__stage`, which they inherit as CSS custom properties. Replaced an earlier canvas
+water simulation — same idea, cursor-reactive light over the gold field, but a mask and a
+couple of gradients instead of a physics loop.
 
-```js
-cur[i] = ((((prev[i-1] + prev[i+1] + prev[i-w] + prev[i+w]) >> 1) - cur[i]) * DAMP) | 0;
-```
+**Split into three elements because a mask and a blend mode each apply to one element's
+whole paint.** You cannot give one `background-image` layer of a single element its own
+`mask-image` while a second layer on that same element gets its own `mix-blend-mode` — so
+each visual idea gets its own element instead:
 
-Buffers swap every step. Rendering refracts a source texture by the local slope
-(`getImageData` once for the texture, `putImageData` each frame), and the same slope
-drives a hard linear highlight — on a near-black field the wave reads through its
-highlight, not its displacement.
-
-**Every value here is tuned energetic on purpose, and that is the whole design.** This
-surface has been softened twice and both times it stopped reading as liquid. A gentler
-pass (30Hz, `DAMP` 0.985, `MAX_OFF` 7, `xo * 3`) flattened it into embossed metal, and a
-later attempt to fix that with a Blinn-Phong specular made it worse in a different way —
-an exponent-16 lobe swings from dark to peak across a tiny change in angle, so
-neighbouring cells land far apart and the ~5× CSS upscale turned every one of those jumps
-into a visible block. Measured: 0.93 mean cell-to-cell roughness against 0.03 for
-refraction alone. **Do not soften this again, and do not replace `sh = xo * 5` with a
-sharper lighting model.** The crispness *is* the water.
-
-Measured on the same drop, same 285×180 grid, crisp against the gentle tuning:
-
-| at 1.5s | crisp | gentle |
+| Layer | Job | How |
 |---|---|---|
-| peak highlight | **45** | 21 |
-| distorted cells | **10,570** | 3,414 |
-| ring span | **133 cells** | 73 |
-| mean bend | **0.61** | 0.16 |
+| `.hero__spades` | the plate the light opens onto | `assets/images/gold-spades.jpg`, `cover` + no-repeat, cut to a circle by a `mask-image: radial-gradient(...)` centred on `--mx`/`--my` |
+| `.hero__glow` | warm bloom | a soft radial gradient ~1.9× the reveal radius, `mix-blend-mode: soft-light` so it washes the field around the circle rather than sitting on top of it as a flat patch |
+| `.hero__rim` | the beam edge | a thin bright ring exactly at `--r`, plus a darkened ring just past it — this is what makes it read as a light landing on the field rather than a glow fading in |
 
-By 3s the crisp ring has crossed 224 of 285 cells and still carries a 30-level highlight;
-the gentle one stalls at 105 cells and fades to 9.
+All three default to `opacity: 0` and `--mx`/`--my: -999px` on `.hero__stage`, so at rest
+the hero is only ever the gold radial gradient already on `.hero__stage` — nothing shows
+until a real pointer is present. They fade in together on `.hero__stage:hover`, and the
+position is lerped toward the real cursor in a `requestAnimationFrame` loop (same pattern
+as `alsoTileBloom()`, just one instance per hero instead of one per tile — `heroSpotlight()`
+runs over every `.hero__stage` on the page, so it wires the service pages exactly the same
+way).
 
-**On sharpness:** the canvas backing store *is* the simulation grid, and CSS stretches it,
-so the browser's bilinear upscale softens the result — more so the larger the display
-(~5× at 1440px, ~8.5× at 2560px). That softness is what keeps the refraction reading as
-liquid rather than as pixels. If you ever want it crisper, the single knob is the
-grid-width cap in `build()`; raising it sharpens at roughly quadratic cost.
+Gated the same way as the tile bloom: skipped entirely — no listener, no visible layer —
+under `(hover: none)` or `prefers-reduced-motion: reduce`. This gate is independent of
+`heroChoreography()`'s `(min-width: 901px)` cinematic breakpoint, so a narrow-but-mouse-
+driven window still gets the spotlight even with the scroll-pin off.
 
-| Knob | Value | Why |
-|---|---|---|
-| Grid width | `≤300`, `cssWidth / 5` | ~50k cells; the canvas backing store *is* the grid, and CSS stretches it, so the browser's bilinear upscale does the softening for free |
-| Timestep | fixed **60Hz** accumulator | the wave front travels exactly one cell per step, so the step rate *is* the wave speed — 60Hz is what makes a drop read as a splash. Fixed rather than per-frame because damping and propagation are both per-step, so raw rAF would run 2.4× faster on a 144Hz display |
-| `DAMP` | `0.99` per step | rings persist ~4s and keep expanding. Below ~0.985 they stop reading as water |
-| `MAX_OFF` | `9` cells | raw offsets from a 500-weight drop reach ~60 cells, which samples garbage instead of refracting. 9 is the most the texture takes while still bending the lattice hard enough to read as water |
-| Highlight | `sh = xo * 5` | hard and linear on purpose. Peaks at ±45 on 0-255 — this is the crispness, and softening it is what flattened the surface twice |
-| `CAUS` | `0.045`, clamped `+30/-15` | caustics from `-∇²h`. Light converges where the surface is concave, so this is the real cause of pool-floor banding, not a fake overlay. Linear, which is why it survives the upscale: measured, it left the max cell-to-cell jump unchanged (131→125) while adding structure. Costs 0.32ms/frame |
-| Trail | radius 2, weight 30 | coalesced to one injection per step and interpolated along the path, so a fast sweep leaves a line not dots |
-| Click | radius 6, weight 500 | the heavy drop |
-| Ambient | radius 3, weight 90, every 1.4–6.4s | small and sharp, scaled against the click — a real drop, not a swell, or the surface stops reading as liquid when nobody is touching it |
-
-If it ever needs to be calmer, lower `DROP_W` and `TRAIL_W` first and leave everything
-else alone — those cost the least character per unit of calm. Reaching for `STEP`,
-`DAMP`, `MAX_OFF` or the `xo * 5` multiplier is what kills the liquid read.
-
-The texture is a warm charcoal field with one key light high-right and a lattice of gold
-hairlines and points. The lattice is the point: straight lines are what make refraction
-legible — you read the wave by how the grid bends.
-
-It pauses on `visibilitychange` and when the hero scrolls out of view, resamples the
-buffers on resize so live waves survive it, and under `prefers-reduced-motion` renders
-the texture once with no loop and no listeners (flat water, so `xo` is zero everywhere and
-what you get is the clean lattice). Pointer events pass through the canvas —
-the listeners sit on `.hero__stage`, so the CTAs stay clickable (and still splash).
-
-`.hero__scrim` is two layers: a fixed left-side bed that guarantees the headline a dark
-surface no matter what the water is doing, and a `::after` atmosphere that deepens with
-scroll.
-
-The scrim ramp is load-bearing with the crisp water underneath, and it is where legibility
-gets fixed — never by softening the water.
-
-Measure it against **real glyph boxes**, which means walking to the text nodes. Both
-obvious shortcuts lie: `.hero__eyebrow` is a wide flex row whose text stops at 49% of the
-width, and `.hero__line` is `display:block`, so `getClientRects` on the element returns
+`.hero__scrim` is unchanged by this rewrite and still does the legibility work: a fixed
+left-side bed that guarantees the headline a dark surface no matter what the spotlight is
+doing, and a `::after` atmosphere that deepens with scroll. It was tuned against the old
+water's brightness range; the spotlight's rim and bloom sit in the same range, so the
+existing ramp holds. If the light ever gets more intense than that, re-measure against
+real glyph boxes — walk to the text nodes, not the element's bounding box. Both obvious
+shortcuts lie: `.hero__eyebrow` is a wide flex row whose text stops at 49% of its width,
+and `.hero__line` is `display: block`, so `getClientRects` on the element returns
 full-width line boxes. Either one samples background far to the right of any actual
-letterform and reports a contrast failure that is not real.
-
-Measured that way, under realistic interaction — a click, a mouse sweep, ambient only,
-four rapid clicks:
-
-| | eyebrow (needs 4.5) | headline (needs 3.0) |
-|---|---|---|
-| one click | 5.54 – 6.29 | 3.80 – 4.66 |
-| four clicks | 5.41 – 5.54 | 4.66 – 5.18 |
-| mouse sweep / ambient | 5.54 | 4.66 |
-
-Under a deliberately unreachable stress case (fourteen simultaneous 500-weight drops
-packed along the text band) the headline dips to 2.73. That is a pre-existing exposure,
-not a caustic artefact — the same case reads 2.87 *with* caustics, which are
-contrast-neutral because their negative lobe offsets the positive one. The cause is that
-`"You need someone"` runs to 80% of the width, where the ramp has reached zero. If you
-ever lengthen a headline line past ~65%, re-measure.
+letterform and can report a contrast failure that is not real.
 
 ## Imagery
 

@@ -85,10 +85,12 @@
 <section class="hero" data-hero aria-label="Introduction">
   <div class="hero__stage" data-stage>
 
-    <!-- Fluid background. 2D water propagation on two alternating buffers;
-         move the pointer for a trail, click for a heavy drop. See fluidHero()
-         in main.js. Pointer events pass through to the CTAs. -->
-    <canvas class="hero__fluid" data-fluid aria-hidden="true"></canvas>
+    <!-- Cursor-trailing spotlight over the gold field: a beam-edge ring plus
+         a warm bloom, opening onto the gold-spade plate beneath. See
+         heroSpotlight() in main.js. Pointer events pass through to the CTAs. -->
+    <div class="hero__spades" aria-hidden="true"></div>
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__rim" aria-hidden="true"></div>
     <div class="hero__scrim" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
 

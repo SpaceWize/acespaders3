@@ -212,28 +212,79 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__stage{
   position:relative;min-height:100svh;overflow:hidden;
   display:flex;align-items:flex-end;
-  /* what you see before the first canvas paint, and if canvas is unavailable */
+  /* the gold field itself — this is the "gold gradient" kept from the water
+     version. Everything below just adds a light moving over it. */
   background:radial-gradient(78% 86% at 74% 4%,#2A2219,#0C0B0A 58%,#060505 100%);
+  /* Read by the three layers below and by heroSpotlight() in main.js. Off
+     canvas at rest, so nothing shows until the pointer actually enters. */
+  --mx:-999px; --my:-999px; --r:clamp(160px,20vw,300px);
 }
 
-/* The fluid surface. Backing store is the simulation grid (≤300px wide) and
-   CSS stretches it, so the browser's bilinear upscale does the softening for
-   free. Pointer events pass through — the listeners live on the stage. */
-.hero__fluid{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  display:block;pointer-events:none;z-index:0;
+/* Three stacked layers, all centred on the same --mx/--my/--r the stage
+   inherits down. Split apart because a mask and a blend mode each apply to
+   one element's whole paint — they cannot live on separate background-image
+   layers of a single element. Pointer events pass through all three; the
+   listener lives on the stage itself. */
+
+/* 1 — the plate the light opens onto. cover + no-repeat, same asset and
+   sizing as the tile bloom, so it reads as the same world at both scales. */
+.hero__spades{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:url('assets/images/gold-spades.jpg');
+  background-repeat:no-repeat;background-position:center;background-size:cover;
+  opacity:0;
+  -webkit-mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
+    #000 0%,#000 55%,rgba(0,0,0,.4) 78%,transparent 100%);
+  mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
+    #000 0%,#000 55%,rgba(0,0,0,.4) 78%,transparent 100%);
+  transition:opacity var(--t-mid) var(--ease);
 }
-/* Two layers doing two jobs. The bed is fixed and guarantees the headline a
-   dark surface no matter what the water is doing under it; the ::after is the
-   atmosphere that deepens as you scroll. Right side stays open so the key
-   light and the ripples are fully visible. */
+/* 2 — warm bloom, wider than the reveal and soft-lit so it washes over both
+   the spades and the dark field around them rather than sitting on top as
+   a flat gradient. */
+.hero__glow{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle calc(var(--r) * 1.9) at var(--mx) var(--my),
+    rgba(255,224,170,.55) 0%,rgba(217,164,65,.18) 42%,transparent 72%);
+  mix-blend-mode:soft-light;
+  opacity:0;
+  transition:opacity var(--t-mid) var(--ease);
+}
+/* 3 — the beam edge: a bright ring exactly at the mask boundary plus a
+   darkened ring just past it, so the reveal reads as an actual light
+   source landing on the field rather than a soft patch fading in. */
+.hero__rim{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(circle var(--r) at var(--mx) var(--my),
+      transparent calc(var(--r) - 3px),rgba(238,190,99,.9) var(--r),transparent calc(var(--r) + 3px)),
+    radial-gradient(circle var(--r) at var(--mx) var(--my),
+      transparent calc(var(--r) + 4px),rgba(0,0,0,.4) calc(var(--r) + 48px),transparent calc(var(--r) + 150px));
+  opacity:0;
+  transition:opacity var(--t-mid) var(--ease);
+}
+@media (hover:hover){
+  .hero__stage:hover .hero__spades,
+  .hero__stage:hover .hero__glow,
+  .hero__stage:hover .hero__rim{opacity:1}
+}
+/* No pointer to trail on touch, and reduced motion drops the whole
+   cursor-follow move — same rule the tile bloom already follows. */
+@media (hover:none),(prefers-reduced-motion:reduce){
+  .hero__spades,.hero__glow,.hero__rim{display:none}
+}
+
+/* The bed is fixed and guarantees the headline a dark surface no matter what
+   the spotlight is doing under it; the ::after is the atmosphere that
+   deepens as you scroll. Right side stays open so the key light and the
+   spotlight are fully visible. */
 .hero__scrim{
   position:absolute;inset:0;pointer-events:none;z-index:1;
   /* The eyebrow's text runs to ~49% of the width, where the old ramp had
      already thinned to .28 — with the crisp water underneath, 12px gold fell
      to 4.08:1 there. Deepened through the mid-left so the type is protected
-     without touching the water: past 62% it still drops away fast, keeping the
-     key light and the ripples fully open on the right. */
+     without touching the field: past 62% it still drops away fast, keeping
+     the key light and the spotlight fully open on the right. */
   background:linear-gradient(90deg,
     rgba(5,5,4,.90) 0%,rgba(5,5,4,.74) 34%,rgba(5,5,4,.22) 62%,rgba(5,5,4,0) 80%);
 }
@@ -840,7 +891,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 
 /* ── SERVICE PAGES ───────────────────────────────────────────
-   Exactly the home hero and nothing else: same stage, same water, same
+   Exactly the home hero and nothing else: same stage, same spotlight, same
    type ramp. One white title where the home page runs two lines, so the
    description inherits the room the gold line used to take.
 
@@ -849,8 +900,8 @@ button,input,select,textarea{font:inherit;color:inherit}
    its progress from (hero height - viewport height), which is zero on a
    non-scrolling page, so it would drive every beat to p=0 and leave the
    copy at opacity 0. With it unbound, the :root defaults (--o1..--o4 = 1)
-   hold everything visible at rest. fluidHero() only needs [data-fluid] and
-   takes the canvas's parent as its stage, so the water still runs. */
+   hold everything visible at rest. heroSpotlight() only needs .hero__stage
+   in the page, so the light still tracks the cursor here too. */
 .js .hero--page{height:auto}          /* beats the 200vh cinematic rule */
 .hero--page .hero__stage{min-height:100svh}
 /* No fixed header on these, so the home hero's 9rem top pad is dead space. */
