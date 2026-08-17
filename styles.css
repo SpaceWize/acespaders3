@@ -334,8 +334,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__cue i{display:block;width:64px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
 
 /* ═══ 3. PROOF STRIP ══════════════════════════════════════════ */
+/* Black, same as the hero above it — the strip reads as the hero's closing
+   line rather than a separate band, and the top rule is what separates the
+   two. From #work down the page alternates black/white with no greys. */
 .proof{
-  background:var(--ink-800);
+  background:var(--ink-900);
   border-block:1px solid var(--line-dark);
   padding-block:clamp(3rem,6vw,4.75rem);
 }
@@ -493,10 +496,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .step p{font-size:var(--fs-sm);color:var(--on-dark-mute)}
 
 /* ═══ 7. ABOUT ════════════════════════════════════════════════ */
-.about{background:var(--ink-800)}
+.about{background:var(--cream);color:var(--on-light)}
+/* Gold at full saturation fails contrast on cream — that is what --gold-ink
+   exists for. Same swap in #results, the other section that flipped light. */
+.about .eyebrow--gold{color:var(--gold-ink)}
 .about__grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);
   gap:clamp(2.5rem,5vw,5rem);align-items:start}
-.portrait{position:relative;overflow:hidden;border:1px solid var(--line-dark)}
+/* The portrait plate stays dark by design, so only its frame follows the
+   section — a --line-dark edge would vanish into the cream around it. */
+.portrait{position:relative;overflow:hidden;border:1px solid var(--line-light)}
 .portrait__art{
   position:relative;aspect-ratio:4/5;
   background:
@@ -522,20 +530,13 @@ button,input,select,textarea{font:inherit;color:inherit}
   font-size:var(--fs-label);font-weight:600;letter-spacing:.16em;text-transform:uppercase;
   color:var(--on-dark-mute);
 }
-.about__copy p{color:var(--on-dark-mute);margin-bottom:var(--sp-2);max-width:56ch}
+.about__copy p{color:var(--on-light-mute);margin-bottom:var(--sp-2);max-width:56ch}
 .about__copy .h2{margin-bottom:var(--sp-3)}
-.pull{
-  margin-top:var(--sp-4);padding-left:var(--sp-3);
-  border-left:2px solid var(--gold);position:relative;
-}
-.pull__spade{width:16px;height:16px;fill:var(--gold);margin-bottom:.75rem}
-.pull p{
-  font:400 clamp(1.25rem,2.2vw,1.75rem)/1.25 var(--f-display);
-  letter-spacing:-.02em;color:var(--on-dark);max-width:24ch;
-}
 
 /* ═══ 8. SECONDARY / ALSO AVAILABLE ═══════════════════════════ */
-.also{background:var(--ink-900);border-top:1px solid var(--line-dark)}
+/* Sits between a cream #about and a cream #results, so the colour change is
+   the separator — the old top rule was there to split it from a grey. */
+.also{background:var(--ink-900)}
 .also__head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24rem);
   gap:var(--sp-4);align-items:end;margin-bottom:clamp(2.5rem,5vw,3.5rem)}
 .also__intro{font-size:var(--fs-sm);color:var(--on-dark-mute);max-width:42ch}
@@ -596,10 +597,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* MOTION #4 — hover only, and only where hover is real */
 @media (hover:hover){
   .alsotile:hover{
-    transform:translateY(-4px);
+    transform:translateY(-6px);
     border-color:rgba(217,164,65,.55);
     background:var(--ink-700);
-    box-shadow:0 18px 40px -22px rgba(0,0,0,.9);
+    /* see the shared card-hover note further down: warm halo, then the
+       dark cast underneath that sells the lift */
+    box-shadow:0 0 26px -4px rgba(217,164,65,.24),
+               0 26px 46px -20px rgba(0,0,0,.95);
   }
   .alsotile:hover .alsotile__ico svg{stroke:var(--gold)}
   .alsotile:hover .alsotile__bloom{opacity:1}
@@ -609,36 +613,79 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (hover:none),(prefers-reduced-motion:reduce){
   .alsotile__bloom{display:none}
 }
+/* ═══ SHARED CARD HOVER ═══════════════════════════════════════
+   .tier, .quote and .alsotile are the page's three card families —
+   the only elements that are genuinely a bounded object on a ground.
+   (.four__item, .step and .stat look card-ish but are bordered rows in
+   a list, so lifting them would break the spine and the column rules
+   they sit on.) All three share one gesture: a short lift plus a gold
+   halo, so a card reads as picked up rather than merely tinted.
+
+   Two shadows do that, and both are needed. The warm one hugs the edge
+   and is the glow; the dark one falls below and is the gap the card
+   just opened under itself. The glow alone reads as a highlight stuck
+   flat to the page — it is the second shadow that makes it float.
+
+   Gold is dosed per ground. On cream (.tier, .quote) it stays tight and
+   low-alpha: cream is already close to gold in hue, so a wide spread
+   turns to mud rather than light. On ink (.alsotile, above) it can
+   spread, because there is contrast to burn. */
+@media (hover:hover){
+  .tier,.quote{
+    transition:transform var(--t-mid) var(--ease),
+               box-shadow var(--t-mid) var(--ease);
+  }
+  .tier:hover,.quote:hover{
+    transform:translateY(-6px);
+    /* the 0-offset ring stands in for a border change: .quote's 2px gold
+       top rule and .tier--lead's dark edge both live on border-color, so
+       setting that here would flatten one or the other */
+    box-shadow:0 0 0 1px rgba(217,164,65,.42),
+               0 0 18px -2px rgba(217,164,65,.28),
+               0 22px 38px -20px rgba(20,18,15,.40);
+  }
+}
+/* Must stay AFTER the lifts above, not before: these selectors tie on
+   specificity with .tier:hover / .quote:hover / .alsotile:hover, so source
+   order is the only thing deciding it. Placed earlier, the lift silently
+   wins and reduced motion gets the movement anyway. The glow is kept —
+   it is a colour change, not motion. */
 @media (prefers-reduced-motion:reduce){
-  .alsotile:hover{transform:none}
+  .alsotile:hover,.tier:hover,.quote:hover{transform:none}
 }
 
 /* ═══ 9. RESULTS ══════════════════════════════════════════════ */
-.results{background:var(--ink-900)}
+.results{background:var(--cream);color:var(--on-light)}
+.results .eyebrow--gold{color:var(--gold-ink)}
 .results__head{margin-bottom:clamp(2.5rem,5vw,4rem)}
 .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3)}
+/* The card is a step off the section rather than a step up: on cream the
+   lift has to come from --cream-2 going slightly darker, where on ink it
+   came from --ink-800 going slightly lighter. */
 .quote{
   display:flex;flex-direction:column;
   padding:clamp(1.5rem,2.4vw,2rem);
-  background:var(--ink-800);border:1px solid var(--line-dark);
-  border-top:2px solid var(--gold);
+  background:var(--cream-2);border:1px solid var(--line-light);
+  border-top:2px solid var(--gold-ink);
 }
-.quote__body{font-size:1.05rem;line-height:1.6;color:#DAD4CB;flex:1}
+.quote__body{font-size:1.05rem;line-height:1.6;color:var(--on-light);flex:1}
 .quote__out{
-  margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--line-dark);
+  margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--line-light);
   font-family:var(--f-util);font-variation-settings:"wdth" 112;
   font-size:var(--fs-label);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--gold);
+  color:var(--gold-ink);
 }
 .quote__by{margin-top:.75rem;display:grid;gap:.15rem;font-size:var(--fs-sm)}
-.quote__by span:first-child{color:var(--on-dark);font-weight:600}
-.quote__by span:last-child{color:var(--on-dark-mute)}
+.quote__by span:first-child{color:var(--on-light);font-weight:600}
+.quote__by span:last-child{color:var(--on-light-mute)}
 
 /* ═══ 10. BY APPOINTMENT ═════════════════════════════════════
    The one centred block on the page. Everything else is left-aligned
    editorial, so centring reads as a formal notice — a gate you pass
    through on the way to the form rather than another pitch. */
-.appt{background:var(--ink-800);border-top:1px solid var(--line-dark)}
+/* Black between a cream #results above and the cream final CTA below, so it
+   needs no rule to separate it — the colour change already does that. */
+.appt{background:var(--ink-900)}
 .plaque{
   position:relative;max-width:62rem;margin-inline:auto;text-align:center;
   padding:clamp(2.5rem,5vw,4rem) clamp(1.5rem,4vw,3.5rem);
