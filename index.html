@@ -85,12 +85,16 @@
 <section class="hero" data-hero aria-label="Introduction">
   <div class="hero__stage" data-stage>
 
-    <!-- Cursor-trailing spotlight over the gold field: a beam-edge ring plus
-         a warm bloom, opening onto the gold-spade plate beneath. See
-         heroSpotlight() in main.js. Pointer events pass through to the CTAs. -->
-    <div class="hero__spades" aria-hidden="true"></div>
+    <!-- Cursor-trailing spotlight over the gold field: a warm bloom opening
+         onto the star video beneath. See heroSpotlight() in main.js, which
+         also drives the ping-pong playback. Pointer events pass through to
+         the CTAs; the video only decodes while the pointer is actually over
+         the stage. -->
+    <video class="hero__plate" data-hero-video aria-hidden="true"
+           muted playsinline preload="auto" disablepictureinpicture>
+      <source src="assets/video/stars.mp4" type="video/mp4">
+    </video>
     <div class="hero__glow" aria-hidden="true"></div>
-    <div class="hero__rim" aria-hidden="true"></div>
     <div class="hero__scrim" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
 

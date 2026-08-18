@@ -220,18 +220,22 @@ button,input,select,textarea{font:inherit;color:inherit}
   --mx:-999px; --my:-999px; --r:clamp(160px,20vw,300px);
 }
 
-/* Three stacked layers, all centred on the same --mx/--my/--r the stage
-   inherits down. Split apart because a mask and a blend mode each apply to
-   one element's whole paint — they cannot live on separate background-image
-   layers of a single element. Pointer events pass through all three; the
-   listener lives on the stage itself. */
+/* Two stacked layers, both centred on the same --mx/--my/--r the stage
+   inherits down. Kept as separate elements because the mask and the blend
+   mode each apply to one element's whole paint — they cannot live on
+   separate layers of a single element. Pointer events pass through both;
+   the listener lives on the stage itself.
 
-/* 1 — the plate the light opens onto. cover + no-repeat, same asset and
-   sizing as the tile bloom, so it reads as the same world at both scales. */
-.hero__spades{
+   There is deliberately no third "beam edge" ring here any more. A bright
+   gold circle at the mask boundary drew the eye to the edge of the effect
+   rather than to what the effect was revealing, which matters much more now
+   that the plate is moving footage. */
+
+/* 1 — the plate the light opens onto: the star video, masked to the circle.
+   object-fit:cover so it fills any stage ratio without letterboxing. */
+.hero__plate{
   position:absolute;inset:0;z-index:0;pointer-events:none;
-  background-image:url('assets/images/gold-spades.jpg');
-  background-repeat:no-repeat;background-position:center;background-size:cover;
+  width:100%;height:100%;object-fit:cover;
   opacity:0;
   -webkit-mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
     #000 0%,#000 55%,rgba(0,0,0,.4) 78%,transparent 100%);
@@ -240,8 +244,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   transition:opacity var(--t-mid) var(--ease);
 }
 /* 2 — warm bloom, wider than the reveal and soft-lit so it washes over both
-   the spades and the dark field around them rather than sitting on top as
-   a flat gradient. */
+   the footage and the dark field around it rather than sitting on top as a
+   flat gradient. */
 .hero__glow{
   position:absolute;inset:0;z-index:0;pointer-events:none;
   background-image:radial-gradient(circle calc(var(--r) * 1.9) at var(--mx) var(--my),
@@ -250,28 +254,16 @@ button,input,select,textarea{font:inherit;color:inherit}
   opacity:0;
   transition:opacity var(--t-mid) var(--ease);
 }
-/* 3 — the beam edge: a bright ring exactly at the mask boundary plus a
-   darkened ring just past it, so the reveal reads as an actual light
-   source landing on the field rather than a soft patch fading in. */
-.hero__rim{
-  position:absolute;inset:0;z-index:0;pointer-events:none;
-  background-image:
-    radial-gradient(circle var(--r) at var(--mx) var(--my),
-      transparent calc(var(--r) - 3px),rgba(238,190,99,.9) var(--r),transparent calc(var(--r) + 3px)),
-    radial-gradient(circle var(--r) at var(--mx) var(--my),
-      transparent calc(var(--r) + 4px),rgba(0,0,0,.4) calc(var(--r) + 48px),transparent calc(var(--r) + 150px));
-  opacity:0;
-  transition:opacity var(--t-mid) var(--ease);
-}
 @media (hover:hover){
-  .hero__stage:hover .hero__spades,
-  .hero__stage:hover .hero__glow,
-  .hero__stage:hover .hero__rim{opacity:1}
+  .hero__stage:hover .hero__plate,
+  .hero__stage:hover .hero__glow{opacity:1}
 }
 /* No pointer to trail on touch, and reduced motion drops the whole
-   cursor-follow move — same rule the tile bloom already follows. */
+   cursor-follow move — same rule the tile bloom already follows. Also means
+   the video is never decoded on those paths: display:none, and the JS that
+   drives it returns early. */
 @media (hover:none),(prefers-reduced-motion:reduce){
-  .hero__spades,.hero__glow,.hero__rim{display:none}
+  .hero__plate,.hero__glow{display:none}
 }
 
 /* The bed is fixed and guarantees the headline a dark surface no matter what
@@ -431,13 +423,36 @@ button,input,select,textarea{font:inherit;color:inherit}
 .formats__head{margin-bottom:clamp(2.5rem,5vw,4rem);
   padding-top:clamp(3.5rem,7vw,6rem);border-top:1px solid var(--line-light)}
 
-.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);align-items:stretch}
+.tiers{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);align-items:stretch;
+}
+
+/* ═══ CARD PANEL — the black tray the cards sit on ════════════
+   .tiers and .quotes double as the tray: they were already the grid, so
+   giving them a background, border and padding avoids a wrapper element
+   and keeps the grid and its ground as one box that can lift together.
+
+   Hover nests on purpose. Hovering a card also hovers the tray, because
+   the card is inside it — so .tray:hover stays true and the tray keeps
+   its glow while the card lights up on top. No JS needed for that; it
+   falls out of how :hover propagates up the tree.
+
+   The tray lifts 6px and the card lifts 6px, so a hovered card sits 12px
+   off the section — the tray reads as one plane, the card as another. */
+.tiers,.quotes{
+  background:var(--ink-900);
+  border:1px solid var(--line-dark);
+  padding:clamp(1.1rem,2.2vw,1.75rem);
+}
 .tier{
   display:flex;flex-direction:column;
   background:var(--cream-2);border:1px solid var(--line-light);
   padding:clamp(1.6rem,2.6vw,2.25rem);
 }
-.tier--lead{background:var(--on-light);border-color:var(--on-light);color:var(--cream)}
+/* --on-light is near-black, which was fine as a dark card on a cream section
+   but disappears into the black tray. The gold edge is what keeps it legible
+   as a separate object — and it still reads as the featured one. */
+.tier--lead{background:var(--on-light);border-color:rgba(217,164,65,.45);color:var(--cream)}
 .tier--lead .tier__name{color:var(--cream)}
 .tier--lead .tier__pitch{color:#B8B2A8}
 .tier--lead .spec dt{color:#8E877D}
@@ -601,8 +616,11 @@ button,input,select,textarea{font:inherit;color:inherit}
     border-color:rgba(217,164,65,.55);
     background:var(--ink-700);
     /* see the shared card-hover note further down: warm halo, then the
-       dark cast underneath that sells the lift */
-    box-shadow:0 0 26px -4px rgba(217,164,65,.24),
+       dark cast underneath that sells the lift. Carries more gold than the
+       cream cards can — ink gives the halo somewhere to fall off to. */
+    box-shadow:0 0 0 1px rgba(217,164,65,.55),
+               0 0 34px -2px rgba(217,164,65,.45),
+               0 0 72px 6px rgba(217,164,65,.20),
                0 26px 46px -20px rgba(0,0,0,.95);
   }
   .alsotile:hover .alsotile__ico svg{stroke:var(--gold)}
@@ -631,27 +649,32 @@ button,input,select,textarea{font:inherit;color:inherit}
    turns to mud rather than light. On ink (.alsotile, above) it can
    spread, because there is contrast to burn. */
 @media (hover:hover){
-  .tier,.quote{
+  .tier,.quote,.tiers,.quotes{
     transition:transform var(--t-mid) var(--ease),
                box-shadow var(--t-mid) var(--ease);
   }
-  .tier:hover,.quote:hover{
+  /* One glow shared by the cards and by the trays under them, so a hovered
+     card and its tray read as the same material at two depths rather than
+     two different effects. */
+  .tier:hover,.quote:hover,.tiers:hover,.quotes:hover{
     transform:translateY(-6px);
     /* the 0-offset ring stands in for a border change: .quote's 2px gold
        top rule and .tier--lead's dark edge both live on border-color, so
        setting that here would flatten one or the other */
-    box-shadow:0 0 0 1px rgba(217,164,65,.42),
-               0 0 18px -2px rgba(217,164,65,.28),
-               0 22px 38px -20px rgba(20,18,15,.40);
+    box-shadow:0 0 0 1px rgba(217,164,65,.70),
+               0 0 30px -2px rgba(217,164,65,.52),
+               0 0 64px 4px rgba(217,164,65,.22),
+               0 24px 42px -20px rgba(20,18,15,.44);
   }
 }
 /* Must stay AFTER the lifts above, not before: these selectors tie on
-   specificity with .tier:hover / .quote:hover / .alsotile:hover, so source
-   order is the only thing deciding it. Placed earlier, the lift silently
-   wins and reduced motion gets the movement anyway. The glow is kept —
-   it is a colour change, not motion. */
+   specificity with the :hover rules, so source order is the only thing
+   deciding it. Placed earlier, the lift silently wins and reduced motion
+   gets the movement anyway. The glow is kept — it is a colour change,
+   not motion. */
 @media (prefers-reduced-motion:reduce){
-  .alsotile:hover,.tier:hover,.quote:hover{transform:none}
+  .alsotile:hover,.tier:hover,.quote:hover,
+  .tiers:hover,.quotes:hover{transform:none}
 }
 
 /* ═══ 9. RESULTS ══════════════════════════════════════════════ */
@@ -678,6 +701,26 @@ button,input,select,textarea{font:inherit;color:inherit}
 .quote__by{margin-top:.75rem;display:grid;gap:.15rem;font-size:var(--fs-sm)}
 .quote__by span:first-child{color:var(--on-light);font-weight:600}
 .quote__by span:last-child{color:var(--on-light-mute)}
+
+/* Every second card keeps the cream above; the odd ones go dark so the tray
+   shows through between them. The grid is 3 across, so alternating by
+   nth-child lands the darks on a diagonal rather than in columns — which is
+   what stops it reading as three striped columns.
+
+   border-color has to come before border-top-color here: the first resets
+   all four sides, and the gold top rule would go with them otherwise. On ink
+   that rule can be full --gold; --gold-ink only exists to survive cream. */
+.quote:nth-child(odd){
+  background:var(--ink-800);
+  border-color:var(--line-dark);
+  border-top-color:var(--gold);
+}
+.quote:nth-child(odd) .quote__body{color:#DAD4CB}
+.quote:nth-child(odd) .quote__out{
+  color:var(--gold);border-top-color:var(--line-dark);
+}
+.quote:nth-child(odd) .quote__by span:first-child{color:var(--on-dark)}
+.quote:nth-child(odd) .quote__by span:last-child{color:var(--on-dark-mute)}
 
 /* ═══ 10. BY APPOINTMENT ═════════════════════════════════════
    The one centred block on the page. Everything else is left-aligned

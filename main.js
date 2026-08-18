@@ -108,12 +108,16 @@
   }
 
   /* ── 1b. HERO SPOTLIGHT ─────────────────────────────────────────
-     Replaces the earlier water simulation. Same idea as the tile bloom
-     below, just bigger and dressed for the hero: a cursor-trailing mask
-     opens onto the gold-spade plate, with a bright rim right at its edge
-     (so it reads as a light source, not a glow) and a soft warm bloom
-     bleeding past it. --mx/--my/--r are set on .hero__stage and inherit
-     down to the three CSS layers that draw it — see styles.css. */
+     A cursor-trailing mask opens onto the star video, with a soft warm
+     bloom bleeding past it. --mx/--my/--r are set on .hero__stage and
+     inherit down to the two CSS layers that draw it — see styles.css.
+
+     This also owns the video's playback, because the two share a trigger:
+     the plate is invisible until the pointer is over the stage, so there
+     is no reason to decode a frame before then. */
+  var VIDEO_SPEED = 1;      // real time; the clip is ~5s, so a full there-
+                            // and-back cycle is ~10s
+
   function heroSpotlight() {
     if (reduce.matches || !window.matchMedia('(hover: hover)').matches) return;
     var stages = [].slice.call(document.querySelectorAll('.hero__stage'));
@@ -123,6 +127,40 @@
       var raw = { x: -999, y: -999 };
       var smooth = { x: -999, y: -999 };
       var running = false;
+
+      var video = stage.querySelector('[data-hero-video]');
+      var t = 0, dir = 1, lastTs = 0, vRaf = 0;
+
+      /* Ping-pong. The clip has no matching first and last frame, so playing
+         it on `loop` snaps visibly at the wrap. Running it forward then
+         backward hides that: the seam becomes a turn, and every frame is one
+         the viewer has already seen a moment earlier.
+
+         Driven by scrubbing currentTime rather than by playbackRate, because
+         a negative playbackRate is not honoured by any current browser — it
+         either throws or silently clamps to 0. Scrubbing also gives the
+         slow-down for free: one knob, VIDEO_SPEED, sets both directions. */
+      function videoStep(ts) {
+        vRaf = requestAnimationFrame(videoStep);
+        var dur = video.duration;
+        if (!dur || !isFinite(dur)) return;      // metadata not in yet
+        if (!lastTs) lastTs = ts;
+        var dt = (ts - lastTs) / 1000;
+        lastTs = ts;
+        if (dt > 0.25) dt = 0.25;                // came back from a stall
+        t += dir * dt * VIDEO_SPEED;
+        if (t >= dur) { t = dur; dir = -1; }
+        else if (t <= 0) { t = 0; dir = 1; }
+        video.currentTime = t;
+      }
+      function videoStart() {
+        if (!video || vRaf) return;
+        lastTs = 0;
+        vRaf = requestAnimationFrame(videoStep);
+      }
+      function videoStop() {
+        if (vRaf) { cancelAnimationFrame(vRaf); vRaf = 0; }
+      }
 
       function loop() {
         smooth.x += (raw.x - smooth.x) * 0.16;
@@ -139,15 +177,22 @@
         if (!running) { running = true; requestAnimationFrame(loop); }
       }
 
+      stage.addEventListener('pointerenter', videoStart);
       stage.addEventListener('pointermove', function (e) {
         var r = stage.getBoundingClientRect();
         raw.x = e.clientX - r.left;
         raw.y = e.clientY - r.top;
+        videoStart();          // pointerenter can be missed after a scroll
         kick();
       }, { passive: true });
       stage.addEventListener('pointerleave', function () {
         raw.x = -999; raw.y = -999;
+        videoStop();
         kick();
+      });
+      // a tab switch mid-hover would otherwise leave the loop scrubbing
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) videoStop();
       });
     });
   }
