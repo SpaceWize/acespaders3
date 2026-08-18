@@ -312,6 +312,10 @@ button,input,select,textarea{font:inherit;color:inherit}
   max-width:56ch;font-size:var(--fs-lead);color:#CFC9C0;
   opacity:var(--o3);transform:translate3d(0,var(--y3),0);
 }
+/* The service pages run several of these in a row. Home has exactly one, so
+   the gap goes between siblings rather than on the element — otherwise the
+   home hero gains a trailing space that throws off its beat spacing. */
+.hero__sub + .hero__sub{margin-top:var(--sp-2)}
 .hero__cta{
   display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-4);
   opacity:var(--o4);transform:translate3d(0,var(--y4),0);
@@ -419,9 +423,21 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 
 /* ═══ 5. TIERS ════════════════════════════════════════════════ */
-.formats{background:var(--cream);color:var(--on-light);padding-top:0}
-.formats__head{margin-bottom:clamp(2.5rem,5vw,4rem);
-  padding-top:clamp(3.5rem,7vw,6rem);border-top:1px solid var(--line-light)}
+/* The rule and the space above it used to sit on .formats__head. That moved
+   inside the black tray, but #work and #formats are both cream and still
+   need a seam between them — so the divider lives on the section now, and
+   runs full-bleed rather than inset to the gutter. */
+.formats{
+  background:var(--cream);color:var(--on-light);
+  padding-top:clamp(3.5rem,7vw,6rem);
+  border-top:1px solid var(--line-light);
+}
+/* Inside the tray now: a grid item, so it needs to span the row or it drops
+   into column one and reads as a fourth card. */
+.formats__head{
+  grid-column:1/-1;
+  margin-bottom:clamp(2rem,4vw,3rem);
+}
 
 .tiers{
   display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);align-items:stretch;
@@ -430,19 +446,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* ═══ CARD PANEL — the black tray the cards sit on ════════════
    .tiers and .quotes double as the tray: they were already the grid, so
    giving them a background, border and padding avoids a wrapper element
-   and keeps the grid and its ground as one box that can lift together.
+   and keeps the grid and its ground as one box.
 
-   Hover nests on purpose. Hovering a card also hovers the tray, because
-   the card is inside it — so .tray:hover stays true and the tray keeps
-   its glow while the card lights up on top. No JS needed for that; it
-   falls out of how :hover propagates up the tree.
-
-   The tray lifts 6px and the card lifts 6px, so a hovered card sits 12px
-   off the section — the tray reads as one plane, the card as another. */
+   The tray is deliberately inert on hover — no glow, no lift. It is the
+   ground the cards are read against, and a ground that reacts competes
+   with the thing standing on it. The cards keep the full treatment. */
 .tiers,.quotes{
   background:var(--ink-900);
   border:1px solid var(--line-dark);
-  padding:clamp(1.1rem,2.2vw,1.75rem);
+  padding:clamp(4.25rem,6.8vw,5.5rem);
 }
 .tier{
   display:flex;flex-direction:column;
@@ -492,8 +504,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tier--lead .pips i{color:var(--cream)}
 
 .tier__cta{margin-top:auto}
-.formats__foot{margin-top:var(--sp-4);font-size:var(--fs-sm);color:var(--on-light-mute);
-  max-width:56ch}
+/* Lives inside the black tray now, so it is a grid item and has to be told
+   to span the full row — left alone it would sit in column 1 and pretend to
+   be a fourth card. Colour follows the tray, not the cream section. */
+.formats__foot{
+  grid-column:1/-1;
+  margin-top:var(--sp-4);font-size:var(--fs-sm);
+  color:var(--on-dark-mute);max-width:56ch;
+}
 
 /* ═══ 6. PROCESS ══════════════════════════════════════════════ */
 .process{background:var(--ink-900)}
@@ -649,14 +667,13 @@ button,input,select,textarea{font:inherit;color:inherit}
    turns to mud rather than light. On ink (.alsotile, above) it can
    spread, because there is contrast to burn. */
 @media (hover:hover){
-  .tier,.quote,.tiers,.quotes{
+  .tier,.quote{
     transition:transform var(--t-mid) var(--ease),
                box-shadow var(--t-mid) var(--ease);
   }
-  /* One glow shared by the cards and by the trays under them, so a hovered
-     card and its tray read as the same material at two depths rather than
-     two different effects. */
-  .tier:hover,.quote:hover,.tiers:hover,.quotes:hover{
+  /* Cards only. The trays under them stay inert — see the panel block
+     above for why. */
+  .tier:hover,.quote:hover{
     transform:translateY(-6px);
     /* the 0-offset ring stands in for a border change: .quote's 2px gold
        top rule and .tier--lead's dark edge both live on border-color, so
@@ -673,8 +690,7 @@ button,input,select,textarea{font:inherit;color:inherit}
    gets the movement anyway. The glow is kept — it is a colour change,
    not motion. */
 @media (prefers-reduced-motion:reduce){
-  .alsotile:hover,.tier:hover,.quote:hover,
-  .tiers:hover,.quotes:hover{transform:none}
+  .alsotile:hover,.tier:hover,.quote:hover{transform:none}
 }
 
 /* ═══ 9. RESULTS ══════════════════════════════════════════════ */
