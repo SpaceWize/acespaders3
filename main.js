@@ -426,7 +426,7 @@
     var form = document.querySelector('[data-form]');
     if (!form) return;
     var status = form.querySelector('[data-status]');
-    var TO = 'hello@acespaders.com'; // REPLACE: destination address
+    var TO = 'info@acespaders.com';   // matches the address shown on the page
 
     function fieldOf(input) { return input.closest('.field'); }
     function errOf(input) {
@@ -523,11 +523,57 @@
         d.get('what')
       ].join('\n');
 
-      status.textContent = 'Opening your email client with the application filled in. '
-        + 'If nothing happens, send it to ' + TO + '.';
-      window.location.href = 'mailto:' + TO
-        + '?subject=' + encodeURIComponent(subject)
-        + '&body=' + encodeURIComponent(body);
+      /* Offer the compose window rather than firing mailto: blind. A bare
+         mailto only works for whoever has a desktop client registered — for
+         a webmail user it opens nothing at all, or an app they never use,
+         and the application is silently lost. These are real links the
+         visitor clicks, which also keeps them clear of popup blocking:
+         window.open() from inside a submit handler is frequently refused,
+         a user-initiated click on an anchor is not. */
+      var su = encodeURIComponent(subject), bd = encodeURIComponent(body);
+      var targets = [
+        { name: 'Gmail',   url: 'https://mail.google.com/mail/?view=cm&fs=1&to=' + TO + '&su=' + su + '&body=' + bd },
+        { name: 'Outlook', url: 'https://outlook.live.com/mail/0/deeplink/compose?to=' + TO + '&subject=' + su + '&body=' + bd },
+        { name: 'Yahoo',   url: 'https://compose.mail.yahoo.com/?to=' + TO + '&subject=' + su + '&body=' + bd },
+        { name: 'Email app', url: 'mailto:' + TO + '?subject=' + su + '&body=' + bd }
+      ];
+
+      var old = form.querySelector('[data-mailpick]');
+      if (old) old.remove();
+
+      var pick = document.createElement('div');
+      pick.className = 'mailpick';
+      pick.setAttribute('data-mailpick', '');
+      var lead = document.createElement('p');
+      lead.className = 'mailpick__lead';
+      lead.textContent = 'Open it in';
+      pick.appendChild(lead);
+
+      var row = document.createElement('div');
+      row.className = 'mailpick__row';
+      targets.forEach(function (t) {
+        var a = document.createElement('a');
+        a.className = 'btn btn--outline btn--sm';
+        a.href = t.url;
+        a.textContent = t.name;
+        if (t.url.indexOf('mailto:') !== 0) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+        row.appendChild(a);
+      });
+      pick.appendChild(row);
+
+      var note = document.createElement('p');
+      note.className = 'mailpick__note';
+      note.textContent = 'Nothing sends until you press send in your mail. '
+        + 'If none of these open, email ' + TO + ' directly.';
+      pick.appendChild(note);
+
+      form.querySelector('.form__foot').appendChild(pick);
+      status.textContent = 'Your application is ready.';
+      // move focus so a keyboard or screen-reader user lands on the choices
+      row.firstChild.focus();
     });
   }
 

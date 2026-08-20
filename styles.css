@@ -17,21 +17,36 @@
   --ink-600:#252220;
   --line-dark:#2E2A26;
 
-  --cream:#EFECE6;
-  --cream-2:#E6E2DA;
-  --line-light:#D5CFC4;
+  /* The site is one dark surface now. Rather than rewrite ~70 declarations,
+     the light-side tokens are remapped onto the dark palette here — every
+     rule that asked for "cream" or "on-light" keeps working and simply
+     resolves dark. Names are legacy; the mapping is the truth. Flip these six
+     back to the hexes in the comment to restore the light sections. */
+  /* Genuinely light surfaces still exist as CARDS on the black page — the
+     testimonial checkerboard and the two outer pricing tiers. They need real
+     hexes, not the remapped tokens below, which all resolve dark now. */
+  --paper:#EFECE6;
+  --paper-2:#E6E2DA;
+  --on-paper:#14120F;
+  --on-paper-mute:#5C574F;
+  --line-paper:#D5CFC4;
+  --gold-on-paper:#7A5610;     /* gold that passes contrast on cream */
+
+  --cream:var(--ink-900);      /* was #EFECE6 */
+  --cream-2:var(--ink-800);    /* was #E6E2DA */
+  --line-light:var(--line-dark); /* was #D5CFC4 */
 
   /* accent */
   --gold:#D9A441;
   --gold-hi:#EEBE63;
-  --gold-ink:#7A5610;          /* gold that passes contrast on cream */
+  --gold-ink:var(--gold);      /* was #7A5610, the gold that passed on cream */
   --gold-wash:rgba(217,164,65,.10);
 
   /* text */
   --on-dark:#F1EDE6;
   --on-dark-mute:#A29C93;
-  --on-light:#14120F;
-  --on-light-mute:#5C574F;
+  --on-light:var(--on-dark);        /* was #14120F */
+  --on-light-mute:var(--on-dark-mute); /* was #5C574F */
 
   /* type */
   --f-display:"Archivo Black","Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -221,53 +236,68 @@ button,input,select,textarea{font:inherit;color:inherit}
   --mx:-999px; --my:-999px; --r:clamp(175px,21vw,320px);
 }
 
-/* Two stacked layers, both centred on the same --mx/--my/--r the stage
-   inherits down. Kept as separate elements because the mask and the blend
-   mode each apply to one element's whole paint — they cannot live on
-   separate layers of a single element. Pointer events pass through both;
-   the listener lives on the stage itself.
+/* One layer now, centred on the --mx/--my/--r the stage inherits down.
+   Pointer events pass through it; the listener lives on the stage itself.
+
+   The warm bloom that used to sit over this is gone — with the clip pulled
+   in to a smaller frame the surrounding black is the point, and a glow
+   spilling past the aperture worked against that.
 
    There is deliberately no third "beam edge" ring here any more. A bright
    gold circle at the mask boundary drew the eye to the edge of the effect
    rather than to what the effect was revealing, which matters much more now
    that the plate is moving footage. */
 
-/* 1 — the plate the light opens onto: the star video, masked to the circle.
-   object-fit:cover so it fills any stage ratio without letterboxing. */
+/* 1 — the plate the light opens onto: the clip, masked to a spade.
+   contain rather than cover, plus padding, so the frame sits smaller and
+   centred with black around it. Under a moving aperture that reads as a lit
+   object in a dark room rather than as full-bleed wallpaper you happen to be
+   cutting a hole in. */
 .hero__plate{
   position:absolute;inset:0;z-index:0;pointer-events:none;
-  width:100%;height:100%;object-fit:cover;
-  /* the clip is graded dark; a small lift keeps the revealed picture from
-     reading as a dim patch against the warm bloom sitting over it */
+  width:100%;height:100%;
+  /* The BOX stays the full stage on purpose: --mx/--my are cursor positions
+     measured against the stage, and mask-position resolves against this
+     element's border box. Shrinking the element itself threw the spade out
+     of register with the cursor. Padding shrinks the picture inside a
+     full-size box instead, so the mask stays aligned. */
+  object-fit:contain;
+  padding:4% 7%;
+  /* the clip is graded dark; a small lift keeps the revealed picture legible
+     now that there is no bloom over it to carry brightness */
   filter:brightness(1.16) saturate(1.05);
   opacity:0;
-  -webkit-mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
-    #000 0%,#000 55%,rgba(0,0,0,.4) 78%,transparent 100%);
-  mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
-    #000 0%,#000 55%,rgba(0,0,0,.4) 78%,transparent 100%);
-  transition:opacity var(--t-mid) var(--ease);
-}
-/* 2 — warm bloom, wider than the reveal and soft-lit so it washes over both
-   the footage and the dark field around it rather than sitting on top as a
-   flat gradient. */
-.hero__glow{
-  position:absolute;inset:0;z-index:0;pointer-events:none;
-  background-image:radial-gradient(circle calc(var(--r) * 1.9) at var(--mx) var(--my),
-    rgba(255,232,190,.72) 0%,rgba(217,164,65,.26) 42%,transparent 74%);
-  mix-blend-mode:soft-light;
-  opacity:0;
+  /* The cutout is the spade itself, not a circle — the same glyph the brand
+     mark and eyebrows use. An SVG mask rather than a gradient, because a
+     gradient can only describe a radial falloff; the softness comes from a
+     feGaussianBlur baked into the SVG, so the edge still feathers.
+     --r stays the half-size, so the box is 2r square and centres on the
+     cursor exactly as the circle did. */
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cfilter id='s' x='-25%25' y='-25%25' width='150%25' height='150%25'%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Cpath filter='url(%23s)' fill='%23000' transform='translate(4 4) scale(1)' d='M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z'/%3E%3C/svg%3E"),radial-gradient(ellipse 58% 54% at 50% 50%,#000 0%,#000 46%,rgba(0,0,0,.55) 72%,transparent 100%);
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cfilter id='s' x='-25%25' y='-25%25' width='150%25' height='150%25'%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Cpath filter='url(%23s)' fill='%23000' transform='translate(4 4) scale(1)' d='M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z'/%3E%3C/svg%3E"),radial-gradient(ellipse 58% 54% at 50% 50%,#000 0%,#000 46%,rgba(0,0,0,.55) 72%,transparent 100%);
+  /* Second mask layer: a vignette, intersected with the spade. The clip is
+     letterboxed by object-fit, so without this its rectangle ends on a hard
+     line inside the aperture. Fading the edges lets it run into the black
+     and meet the vignette already baked into the footage. Two layers means
+     every mask-* property needs two values, in the same order. */
+  -webkit-mask-repeat:no-repeat,no-repeat; mask-repeat:no-repeat,no-repeat;
+  -webkit-mask-size:calc(var(--r) * 2) calc(var(--r) * 2),100% 100%;
+  mask-size:calc(var(--r) * 2) calc(var(--r) * 2),100% 100%;
+  -webkit-mask-position:calc(var(--mx) - var(--r)) calc(var(--my) - var(--r)),center;
+  mask-position:calc(var(--mx) - var(--r)) calc(var(--my) - var(--r)),center;
+  -webkit-mask-composite:source-in;   /* webkit spelling of intersect */
+  mask-composite:intersect;
   transition:opacity var(--t-mid) var(--ease);
 }
 @media (hover:hover){
-  .hero__stage:hover .hero__plate,
-  .hero__stage:hover .hero__glow{opacity:1}
+  .hero__stage:hover .hero__plate{opacity:1}
 }
 /* No pointer to trail on touch, and reduced motion drops the whole
    cursor-follow move — same rule the tile bloom already follows. Also means
    the video is never decoded on those paths: display:none, and the JS that
    drives it returns early. */
 @media (hover:none),(prefers-reduced-motion:reduce){
-  .hero__plate,.hero__glow{display:none}
+  .hero__plate{display:none}
 }
 
 /* The bed is fixed and guarantees the headline a dark surface no matter what
@@ -459,25 +489,47 @@ button,input,select,textarea{font:inherit;color:inherit}
    The tray is deliberately inert on hover — no glow, no lift. It is the
    ground the cards are read against, and a ground that reacts competes
    with the thing standing on it. The cards keep the full treatment. */
+/* Black, matching the section. At rest only the hairline border marks the
+   tray out; the glow on hover is what gives it presence. */
 .quotes{
   background:var(--ink-900);
   border:1px solid var(--line-dark);
   padding:clamp(4.25rem,6.8vw,5.5rem);
 }
-.tiers{padding-block:clamp(1rem,2.5vw,2rem)}
+/* The tray is back. It sits on the same black as the section, so the border
+   is what draws it — that reads as a framed panel rather than a floating
+   rectangle, and it gives the cream cards inside something to sit on. */
+.tiers{
+  background:var(--ink-900);
+  border:1px solid var(--line-dark);
+  padding:clamp(2.5rem,4.5vw,4rem);
+}
+/* The two outer tiers are cream cards on the black section; .tier--lead below
+   stays dark, so the trio reads light / dark / light. */
 .tier{
   display:flex;flex-direction:column;
-  background:var(--cream-2);border:1px solid var(--line-light);
+  background:var(--paper-2);border:1px solid var(--line-paper);
+  color:var(--on-paper);
   padding:clamp(1.6rem,2.6vw,2.25rem);
 }
+.tier .tier__name,.tier .spec dd{color:var(--on-paper)}
+.tier .tier__pitch,.tier .spec dt{color:var(--on-paper-mute)}
+.tier .spec>div{border-top-color:var(--line-paper)}
+.tier .spec dd.tier__inv{color:var(--gold-on-paper)}
+.tier .pips i.on{background:var(--gold-on-paper)}
+.tier .btn--outline{border-color:var(--line-paper);color:var(--on-paper)}
+.tier .btn--outline:hover{border-color:var(--gold-on-paper);color:var(--gold-on-paper)}
 /* --on-light is near-black, which was fine as a dark card on a cream section
    but disappears into the black tray. The gold edge is what keeps it legible
    as a separate object — and it still reads as the featured one. */
-.tier--lead{background:var(--on-light);border-color:rgba(217,164,65,.45);color:var(--cream)}
-.tier--lead .tier__name{color:var(--cream)}
+/* Was the single dark card on a cream section. With everything dark that
+   read as nothing, so the emphasis is carried by a lifted surface and a
+   gold edge instead of by inversion. */
+.tier--lead{background:var(--ink-700);border-color:rgba(217,164,65,.55);color:var(--on-dark)}
+.tier--lead .tier__name{color:var(--on-dark)}
 .tier--lead .tier__pitch{color:#B8B2A8}
 .tier--lead .spec dt{color:#8E877D}
-.tier--lead .spec dd{color:var(--cream)}
+.tier--lead .spec dd{color:var(--on-dark)}
 .tier--lead .spec>div{border-top-color:#38332D}
 
 .tier__flag{
@@ -510,9 +562,27 @@ button,input,select,textarea{font:inherit;color:inherit}
   background:currentColor;opacity:.22}
 .pips i.on{background:var(--gold-ink);opacity:1}
 .tier--lead .pips i.on{background:var(--gold)}
-.tier--lead .pips i{color:var(--cream)}
+.tier--lead .pips i{color:var(--on-dark)}
 
 .tier__cta{margin-top:auto}
+
+/* Closing line inside the tray, under the three cards. Spans the row or it
+   would drop into column one and read as a fourth card. */
+.formats__foot{
+  grid-column:1/-1;
+  margin-top:clamp(2rem,4vw,3rem);
+  padding-top:var(--sp-3);
+  border-top:1px solid var(--line-dark);
+  font-size:var(--fs-sm);color:var(--on-dark-mute);max-width:62ch;
+}
+/* Sits outside and under the tray, leading into "Four steps". Centred so it
+   reads as a bridge between the two blocks rather than as more tray copy. */
+.formats__bridge{
+  margin-top:clamp(2.5rem,5vw,4rem);
+  text-align:center;
+  font-size:var(--fs-lead);color:var(--on-dark-mute);
+  max-width:56ch;margin-inline:auto;
+}
 
 /* ═══ 6. PROCESS ══════════════════════════════════════════════ */
 /* Pulled up: #formats above is black too, so the usual full section gap
@@ -540,7 +610,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   gap:clamp(2.5rem,5vw,5rem);align-items:start}
 /* The portrait plate stays dark by design, so only its frame follows the
    section — a --line-dark edge would vanish into the cream around it. */
-.portrait{position:relative;overflow:hidden;border:1px solid var(--line-light)}
+.portrait{position:relative;overflow:hidden;border:1px solid var(--ink-600)}
 .portrait__art{
   position:relative;aspect-ratio:4/5;
   background:
@@ -670,13 +740,24 @@ button,input,select,textarea{font:inherit;color:inherit}
    turns to mud rather than light. On ink (.alsotile, above) it can
    spread, because there is contrast to burn. */
 @media (hover:hover){
-  .tier,.quote{
+  .tier,.quote,.portrait{
     transition:transform var(--t-mid) var(--ease),
                box-shadow var(--t-mid) var(--ease);
   }
-  /* Cards only. The trays under them stay inert — see the panel block
-     above for why. */
-  .tier:hover,.quote:hover{
+  /* Trays and the contact form glow too, but they do not lift — a panel
+     that big rising off the page reads as the layout breaking rather than
+     as depth. They get the halo only; the cards keep halo plus lift. */
+  .tiers,.quotes,.form{
+    transition:box-shadow var(--t-mid) var(--ease),
+               border-color var(--t-mid) var(--ease);
+  }
+  .tiers:hover,.quotes:hover,.form:hover{
+    border-color:rgba(217,164,65,.45);
+    box-shadow:0 0 0 1px rgba(217,164,65,.30),
+               0 0 40px -6px rgba(217,164,65,.30),
+               0 0 90px 8px rgba(217,164,65,.14);
+  }
+  .tier:hover,.quote:hover,.portrait:hover{
     transform:translateY(-6px);
     /* the 0-offset ring stands in for a border change: .quote's 2px gold
        top rule and .tier--lead's dark edge both live on border-color, so
@@ -693,7 +774,8 @@ button,input,select,textarea{font:inherit;color:inherit}
    gets the movement anyway. The glow is kept — it is a colour change,
    not motion. */
 @media (prefers-reduced-motion:reduce){
-  .alsotile:hover,.tier:hover,.quote:hover{transform:none}
+  .alsotile:hover,.tier:hover,.quote:hover,.portrait:hover{transform:none}
+  /* trays and .form only ever glow, so there is no transform to cancel */
 }
 
 /* ═══ 9. RESULTS ══════════════════════════════════════════════ */
@@ -704,22 +786,26 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* The card is a step off the section rather than a step up: on cream the
    lift has to come from --cream-2 going slightly darker, where on ink it
    came from --ink-800 going slightly lighter. */
+/* Even cards are cream, odd are black (rule below) — a real checkerboard
+   rather than two dark tones, which is what it collapsed to when the page
+   went all-dark. */
 .quote{
   display:flex;flex-direction:column;
   padding:clamp(1.5rem,2.4vw,2rem);
-  background:var(--cream-2);border:1px solid var(--line-light);
-  border-top:2px solid var(--gold-ink);
+  background:var(--paper-2);border:1px solid var(--line-paper);
+  border-top:2px solid var(--gold-on-paper);
+  color:var(--on-paper);
 }
-.quote__body{font-size:1.05rem;line-height:1.6;color:var(--on-light);flex:1}
+.quote__body{font-size:1.05rem;line-height:1.6;color:var(--on-paper);flex:1}
 .quote__out{
-  margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--line-light);
+  margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--line-paper);
   font-family:var(--f-util);font-variation-settings:"wdth" 112;
   font-size:var(--fs-label);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--gold-ink);
+  color:var(--gold-on-paper);
 }
 .quote__by{margin-top:.75rem;display:grid;gap:.15rem;font-size:var(--fs-sm)}
-.quote__by span:first-child{color:var(--on-light);font-weight:600}
-.quote__by span:last-child{color:var(--on-light-mute)}
+.quote__by span:first-child{color:var(--on-paper);font-weight:600}
+.quote__by span:last-child{color:var(--on-paper-mute)}
 
 /* Every second card keeps the cream above; the odd ones go dark so the tray
    shows through between them. The grid is 3 across, so alternating by
@@ -729,8 +815,14 @@ button,input,select,textarea{font:inherit;color:inherit}
    border-color has to come before border-top-color here: the first resets
    all four sides, and the gold top rule would go with them otherwise. On ink
    that rule can be full --gold; --gold-ink only exists to survive cream. */
+/* The alternation survived the page going all-dark only because these two
+   are now set apart explicitly. Base (.quote, even) was --cream-2 and this
+   was --ink-800; after the remap both resolved to the same value and the
+   checkerboard vanished. Two dark tones rather than dark/light, to stay with
+   the all-black page — swap this back to a cream fill if the harder contrast
+   is wanted. */
 .quote:nth-child(odd){
-  background:var(--ink-800);
+  background:var(--ink-900);
   border-color:var(--line-dark);
   border-top-color:var(--gold);
 }
@@ -809,8 +901,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cta__meta a{color:var(--gold-ink);text-decoration:underline;text-underline-offset:.25em}
 .cta__fine{margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--on-light-mute)}
 
+/* Its own panel on the black page, so it reads as the thing you act on
+   rather than as loose fields on a background. */
 .form{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3) var(--sp-3);
-  background:var(--cream-2);border:1px solid var(--line-light);
+  background:var(--ink-900);border:1px solid var(--line-dark);
   padding:clamp(1.5rem,3vw,2.5rem)}
 .field{display:grid;gap:.45rem}
 .field--full{grid-column:1/-1}
@@ -821,8 +915,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 .field input,.field select,.field textarea{
   width:100%;min-height:50px;padding:.75rem .9rem;
-  background:var(--cream);border:1px solid var(--line-light);border-radius:0;
-  color:var(--on-light);font-size:var(--fs-body);
+  /* Not var(--cream) any more: that now resolves to the section colour and
+     the field disappeared into it. A lifted fill plus a brighter edge is what
+     makes a control look like a control on an all-dark page. */
+  background:var(--ink-800);border:1px solid var(--ink-600);border-radius:0;
+  color:var(--on-dark);font-size:var(--fs-body);
   transition:border-color var(--t-fast) var(--ease);
 }
 .field textarea{min-height:auto;resize:vertical}
@@ -871,6 +968,36 @@ button,input,select,textarea{font:inherit;color:inherit}
 .form__foot{grid-column:1/-1;display:grid;gap:.75rem}
 .form__status{font-size:var(--fs-sm);color:var(--on-light-mute)}
 .form__status:empty{display:none}
+
+/* Appears only after a valid submit, listing where to open the composed
+   application. Set apart with a rule and a lifted panel so it reads as the
+   next step rather than as more form. */
+.mailpick{
+  margin-top:var(--sp-2);padding-top:var(--sp-3);
+  border-top:1px solid var(--line-dark);
+  display:grid;gap:var(--sp-2);
+}
+.mailpick__lead{
+  font-family:var(--f-util);font-variation-settings:"wdth" 112;
+  font-size:var(--fs-label);font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);
+}
+.mailpick__row{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+/* The outline button was drawn for a cream ground: on black its --ink-600
+   border sits DARKER than the panel's own rule and the button stops looking
+   like one. These are the action, so they carry gold. */
+.mailpick .btn--outline{
+  border-color:rgba(217,164,65,.45);color:var(--on-dark);
+  transition:border-color var(--t-mid) var(--ease),
+             color var(--t-mid) var(--ease),
+             box-shadow var(--t-mid) var(--ease);
+}
+.mailpick .btn--outline:hover,
+.mailpick .btn--outline:focus-visible{
+  border-color:var(--gold);color:var(--gold);
+  box-shadow:0 0 18px -4px rgba(217,164,65,.5);
+}
+.mailpick__note{font-size:.8125rem;color:var(--on-dark-mute);max-width:52ch}
 
 /* ═══ 11. FOOTER ══════════════════════════════════════════════ */
 .foot{background:var(--ink-900);border-top:1px solid var(--line-dark);

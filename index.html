@@ -22,7 +22,7 @@
 </head>
 <body>
 
-<a class="skip" href="#work">Skip to the work</a>
+<a class="skip" href="#formats">Skip to the work</a>
 
 <svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0"><defs>
   <symbol id="i-spade" viewBox="0 0 24 24"><path d="M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z"/></symbol>
@@ -46,7 +46,6 @@
 
     <nav class="nav" aria-label="Primary">
       <ul class="nav__list" data-nav>
-        <li><a href="#work">The Four</a></li>
         <li><a href="#formats">Formats</a></li>
         <li><a href="#process">Process</a></li>
         <li><a href="#about">About</a></li>
@@ -66,7 +65,6 @@
 <div class="mnav" id="mobile-nav" hidden data-mnav>
   <nav aria-label="Mobile">
     <ul>
-      <li><a href="#work">The Four</a></li>
       <li><a href="#formats">Formats</a></li>
       <li><a href="#process">Process</a></li>
       <li><a href="#about">About</a></li>
@@ -85,16 +83,14 @@
 <section class="hero" data-hero aria-label="Introduction">
   <div class="hero__stage" data-stage>
 
-    <!-- Cursor-trailing spotlight over the gold field: a warm bloom opening
-         onto the star video beneath. See heroSpotlight() in main.js, which
-         also drives the ping-pong playback. Pointer events pass through to
-         the CTAs; the video only decodes while the pointer is actually over
-         the stage. -->
+    <!-- Cursor-trailing spade-shaped aperture onto the cybertruck clip. See
+         heroSpotlight() in main.js, which also drives the ping-pong
+         playback. Pointer events pass through to the CTAs; the clip only
+         decodes while the pointer is over the stage. -->
     <video class="hero__plate" data-hero-video aria-hidden="true"
            muted playsinline preload="metadata" disablepictureinpicture>
       <source src="assets/video/cybertruck.mp4" type="video/mp4">
     </video>
-    <div class="hero__glow" aria-hidden="true"></div>
     <div class="hero__scrim" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
 
@@ -115,49 +111,6 @@
     </div>
 
     <div class="hero__cue" aria-hidden="true"><span>Scroll</span><i></i></div>
-  </div>
-</section>
-
-
-<!-- ══════════════ 4. FLAGSHIP CLUSTER — MOTION #2: ordered staggered reveal ══════════════ -->
-<section class="section four-sec" id="work" aria-labelledby="work-h">
-  <div class="wrap">
-    <div class="four-sec__head">
-      <div>
-        
-        <h2 class="h2" id="work-h">The work Ace is Valued For</h2>
-      </div>
-    </div>
-
-    <ol class="four" data-four>
-      <li class="four__item" style="--i:0">
-        <span class="four__node" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-spade"></use></svg></span>
-        <h3 class="four__title">Project<br>Management</h3>
-        <div class="four__body">
-          <p>When you need someone who can see the whole picture, and not just what’s in frame. Ace listens to your vision and works with you and your team to create systems for achieving your goals. Taking every aspect into account, he effectively addresses and resolves problems, manages them as they occur, while preventing many before they happen.</p>
-          <a class="tlink" href="project-management.html">Learn More <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
-        </div>
-      </li>
-
-      <li class="four__item" style="--i:1">
-        <span class="four__node" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-spade"></use></svg></span>
-        <h3 class="four__title">Representation</h3>
-        <div class="four__body">
-          <p>When you can’t be onsite, in the room, or simply want the benefits of sending someone on your behalf. Ace shows up when and where you need him, presenting himself how you need him to. Whether you need a casual or silent partner putting eyes on a project, or a professional representative to handle a crucial meeting or negotiation, he steps in with the authority or discretion you need.
-</p>
-          <a class="tlink" href="representation.html">Learn More <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
-        </div>
-      </li>
-
-      <li class="four__item" style="--i:2">
-        <span class="four__node" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-spade"></use></svg></span>
-        <h3 class="four__title">Facilitation</h3>
-        <div class="four__body">
-          <p>When you need someone to lead the room with confidence and consideration. Ace has attended and hosted many events of various sizes, and networked with individuals from all walks of life. From boardroom meetings, to workshops and seminars, he knows how to engage an audience and share your message in a way that everyone in the room can hear.</p>
-          <a class="tlink" href="facilitation.html">Learn More <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
-        </div>
-      </li>
-    </ol>
   </div>
 </section>
 
@@ -216,7 +169,12 @@
         <a class="btn btn--outline tier__cta" href="#contact">Make The Commitment</a> <!--link to contact form-->
       </article>
 
+      <!-- REPLACE: blurb inside the box, under the three cards -->
+      <p class="formats__foot">Copy will go here. Coming soon..</p>
     </div>
+
+    <!-- REPLACE: blurb under the box, leading into "Four steps" -->
+    <p class="formats__bridge">Copy will go here. Coming soon..</p>
   </div>
 </section>
 
@@ -287,26 +245,26 @@ This is what it means to have an “Ace” up your sleeve.
     </div>
 
     <ul class="also__grid">
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="advisory.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-compass"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-compass"></use></svg></span>
         <h3>Advisory</h3><p>An insightful look at your situation and a straightforward approach to addressing or improving it.</p></a></li>
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="on-location-scouting.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"></use></svg></span>
         <h3>On-location scouting</h3><p>Sites, situations, and opportunities assessed in person. Ace goes in (locally or abroad), evaluates the real conditions, and reports back so you can decide with better information.
 </p></a></li>
       <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="premium-pickup-transport.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"></use></svg></span>
         <h3>Premium Pickup & Transport</h3><p>When you need someone professional and reliable to take you, your client, or delivery where it needs to go in style.</p></a></li>
       <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="public-speaking.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scale"></use></svg></span>
         <h3>Public Speaking</h3><p>Engaging keynotes and masterclasses on resilience, personal development, and decision-making.</p></a></li>
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="business-scaling.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"></use></svg></span>
         <h3>Business Scaling</h3><p>Systems, hiring and strategy for companies in need of growth, or growth management.</p></a></li>
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="crisis-navigation.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"></use></svg></span>
         <h3>Crisis Navigation</h3><p>Direct, grounded guidance when facing sudden, life-altering business or personal situations or decisions.</p></a></li>
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="boots-on-the-ground.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"></use></svg></span>
         <h3>Situational Mindset Adjustments</h3><p>Targeted support for a specific mindset shift, whether you already know what needs to change or need help identifying the right shift in the first place.
 </p></a></li>
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="strategic-marketing.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"></use></svg></span>
         <h3>Strategic Marketing</h3><p>A unique perspective and planning tailored to your vision and guided by current societal and economic circumstances.
 </p></a></li>
-      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="health-lifestyle-mindset.html"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"></use></svg></span>
+      <li class="alsotile"><span class="alsotile__bloom" aria-hidden="true"></span><a class="alsotile__link" href="#contact"><span class="alsotile__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"></use></svg></span>
         <h3>Health Mindset Adjustments</h3><p>When you already know what to do for your health, but need help wanting to do it or enjoying the process. Focused on how you view and relate to health, not nutrition or training plans.
 
 </p></a></li>
@@ -524,24 +482,24 @@ Activity locations are private and only shared with group and mastermind members
         <ul>
           <li><a href="mastermind-membership.html">The Invested Aces Mastermind</a></li>
           <li><a href="group-activities.html">Ace’s Group Activities</a></li>
-          <li><a href="project-management.html">Project management</a></li>
-          <li><a href="representation.html">Representation</a></li>
-          <li><a href="facilitation.html">Facilitation</a></li>
+          <li><a href="#contact">Project management</a></li>
+          <li><a href="#contact">Representation</a></li>
+          <li><a href="#contact">Facilitation</a></li>
         </ul>
       </nav>
 
       <nav class="foot__nav" aria-label="Also available">
         <p class="foot__h">Also available</p>
         <ul>
-          <li><a href="advisory.html">Advisory</a></li>
-          <li><a href="on-location-scouting.html">On-location scouting</a></li>
+          <li><a href="#contact">Advisory</a></li>
+          <li><a href="#contact">On-location scouting</a></li>
           <li><a href="premium-pickup-transport.html">Premium pickup &amp; transport</a></li>
           <li><a href="public-speaking.html">Public speaking</a></li>
-          <li><a href="business-scaling.html">Business scaling</a></li>
-          <li><a href="crisis-navigation.html">Crisis navigation</a></li>
-          <li><a href="boots-on-the-ground.html">Boots on the ground</a></li>
-          <li><a href="strategic-marketing.html">Strategic marketing</a></li>
-          <li><a href="health-lifestyle-mindset.html">Health &amp; lifestyle mindset adjustments</a></li>
+          <li><a href="#contact">Business scaling</a></li>
+          <li><a href="#contact">Crisis navigation</a></li>
+          <li><a href="#contact">Boots on the ground</a></li>
+          <li><a href="#contact">Strategic marketing</a></li>
+          <li><a href="#contact">Health &amp; lifestyle mindset adjustments</a></li>
         </ul>
       </nav>
 
