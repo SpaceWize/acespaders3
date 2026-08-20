@@ -215,9 +215,10 @@ button,input,select,textarea{font:inherit;color:inherit}
   /* the gold field itself — this is the "gold gradient" kept from the water
      version. Everything below just adds a light moving over it. */
   background:radial-gradient(78% 86% at 74% 4%,#2A2219,#0C0B0A 58%,#060505 100%);
-  /* Read by the three layers below and by heroSpotlight() in main.js. Off
-     canvas at rest, so nothing shows until the pointer actually enters. */
-  --mx:-999px; --my:-999px; --r:clamp(160px,20vw,300px);
+  /* Read by the two layers below and by heroSpotlight() in main.js. Off
+     canvas at rest, so nothing shows until the pointer actually enters.
+     --r is now a touch past the original clamp(160px,20vw,300px). */
+  --mx:-999px; --my:-999px; --r:clamp(175px,21vw,320px);
 }
 
 /* Two stacked layers, both centred on the same --mx/--my/--r the stage
@@ -236,6 +237,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__plate{
   position:absolute;inset:0;z-index:0;pointer-events:none;
   width:100%;height:100%;object-fit:cover;
+  /* the clip is graded dark; a small lift keeps the revealed picture from
+     reading as a dim patch against the warm bloom sitting over it */
+  filter:brightness(1.16) saturate(1.05);
   opacity:0;
   -webkit-mask-image:radial-gradient(circle var(--r) at var(--mx) var(--my),
     #000 0%,#000 55%,rgba(0,0,0,.4) 78%,transparent 100%);
@@ -249,7 +253,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__glow{
   position:absolute;inset:0;z-index:0;pointer-events:none;
   background-image:radial-gradient(circle calc(var(--r) * 1.9) at var(--mx) var(--my),
-    rgba(255,224,170,.55) 0%,rgba(217,164,65,.18) 42%,transparent 72%);
+    rgba(255,232,190,.72) 0%,rgba(217,164,65,.26) 42%,transparent 74%);
   mix-blend-mode:soft-light;
   opacity:0;
   transition:opacity var(--t-mid) var(--ease);
@@ -423,14 +427,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 
 /* ═══ 5. TIERS ════════════════════════════════════════════════ */
-/* The rule and the space above it used to sit on .formats__head. That moved
-   inside the black tray, but #work and #formats are both cream and still
-   need a seam between them — so the divider lives on the section now, and
-   runs full-bleed rather than inset to the gutter. */
+/* Black across the full width now, so the tray that used to hold the cards
+   is gone — see .tiers below. No border-top either: #work above is cream, so
+   the colour change is the seam and a rule on top of it would only read as
+   a stray hairline. */
 .formats{
-  background:var(--cream);color:var(--on-light);
+  background:var(--ink-900);color:var(--on-dark);
   padding-top:clamp(3.5rem,7vw,6rem);
-  border-top:1px solid var(--line-light);
 }
 /* Inside the tray now: a grid item, so it needs to span the row or it drops
    into column one and reads as a fourth card. */
@@ -444,18 +447,24 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 
 /* ═══ CARD PANEL — the black tray the cards sit on ════════════
-   .tiers and .quotes double as the tray: they were already the grid, so
-   giving them a background, border and padding avoids a wrapper element
-   and keeps the grid and its ground as one box.
+   .quotes doubles as the tray: it was already the grid, so giving it a
+   background, border and padding avoids a wrapper element and keeps the
+   grid and its ground as one box.
+
+   .tiers no longer needs one. #formats is black edge to edge now, so a
+   black tray inside it would be an invisible box betrayed only by its
+   border — a hairline rectangle floating in matching black. It keeps the
+   inner padding so the cards stay off the section edges.
 
    The tray is deliberately inert on hover — no glow, no lift. It is the
    ground the cards are read against, and a ground that reacts competes
    with the thing standing on it. The cards keep the full treatment. */
-.tiers,.quotes{
+.quotes{
   background:var(--ink-900);
   border:1px solid var(--line-dark);
   padding:clamp(4.25rem,6.8vw,5.5rem);
 }
+.tiers{padding-block:clamp(1rem,2.5vw,2rem)}
 .tier{
   display:flex;flex-direction:column;
   background:var(--cream-2);border:1px solid var(--line-light);
@@ -504,17 +513,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tier--lead .pips i{color:var(--cream)}
 
 .tier__cta{margin-top:auto}
-/* Lives inside the black tray now, so it is a grid item and has to be told
-   to span the full row — left alone it would sit in column 1 and pretend to
-   be a fourth card. Colour follows the tray, not the cream section. */
-.formats__foot{
-  grid-column:1/-1;
-  margin-top:var(--sp-4);font-size:var(--fs-sm);
-  color:var(--on-dark-mute);max-width:56ch;
-}
 
 /* ═══ 6. PROCESS ══════════════════════════════════════════════ */
-.process{background:var(--ink-900)}
+/* Pulled up: #formats above is black too, so the usual full section gap
+   between them just reads as dead space rather than as a separation. */
+.process{background:var(--ink-900);padding-top:clamp(2rem,4vw,3.25rem)}
 .process__head{margin-bottom:clamp(3rem,6vw,4.5rem)}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 .step{padding:0 var(--sp-3);border-left:1px solid var(--line-dark)}

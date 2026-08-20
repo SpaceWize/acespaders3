@@ -108,15 +108,15 @@
   }
 
   /* ── 1b. HERO SPOTLIGHT ─────────────────────────────────────────
-     A cursor-trailing mask opens onto the star video, with a soft warm
+     A cursor-trailing mask opens onto the hero clip, with a soft warm
      bloom bleeding past it. --mx/--my/--r are set on .hero__stage and
      inherit down to the two CSS layers that draw it — see styles.css.
 
      This also owns the video's playback, because the two share a trigger:
      the plate is invisible until the pointer is over the stage, so there
      is no reason to decode a frame before then. */
-  var VIDEO_SPEED = 1;      // real time; the clip is ~5s, so a full there-
-                            // and-back cycle is ~10s
+  var VIDEO_SPEED = 1;      // real time; the clip is ~12s, so a full there-
+                            // and-back cycle is ~24s
 
   function heroSpotlight() {
     if (reduce.matches || !window.matchMedia('(hover: hover)').matches) return;
@@ -129,37 +129,80 @@
       var running = false;
 
       var video = stage.querySelector('[data-hero-video]');
-      var t = 0, dir = 1, lastTs = 0, vRaf = 0;
+      var dir = 1;            // 1 = playing forward, -1 = scrubbing back
+      var vRaf = 0, vLast = 0, vOn = false;
 
-      /* Ping-pong. The clip has no matching first and last frame, so playing
-         it on `loop` snaps visibly at the wrap. Running it forward then
-         backward hides that: the seam becomes a turn, and every frame is one
-         the viewer has already seen a moment earlier.
+      /* Ping-pong. The clip's first and last frames do not match, so plain
+         `loop` snaps visibly at the wrap. Forward then backward hides that:
+         the seam becomes a turn, and every frame on the way back is one the
+         viewer saw a moment earlier.
 
-         Driven by scrubbing currentTime rather than by playbackRate, because
-         a negative playbackRate is not honoured by any current browser — it
-         either throws or silently clamps to 0. Scrubbing also gives the
-         slow-down for free: one knob, VIDEO_SPEED, sets both directions. */
-      function videoStep(ts) {
-        vRaf = requestAnimationFrame(videoStep);
-        var dur = video.duration;
-        if (!dur || !isFinite(dur)) return;      // metadata not in yet
-        if (!lastTs) lastTs = ts;
-        var dt = (ts - lastTs) / 1000;
-        lastTs = ts;
-        if (dt > 0.25) dt = 0.25;                // came back from a stall
-        t += dir * dt * VIDEO_SPEED;
-        if (t >= dur) { t = dur; dir = -1; }
-        else if (t <= 0) { t = 0; dir = 1; }
+         The forward leg is native playback, not a scrub. Driving both legs by
+         writing currentTime every frame made the clip advance only as fast as
+         requestAnimationFrame was served — so anything that starved rAF (a
+         busy main thread, a throttled tab, a low-power display) stalled the
+         picture, and the motion appeared tied to cursor movement rather than
+         to time. play() is driven by the media clock instead and keeps going
+         on its own.
+
+         Only the return leg scrubs, because no browser honours a negative
+         playbackRate. That is affordable here: the clip is encoded with a
+         keyframe every 12 frames, which puts a backward seek at ~0.1ms. */
+      function forward() {
+        dir = 1;
+        video.playbackRate = VIDEO_SPEED;
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});   // autoplay refusal is fine
+      }
+      function reverseStep(ts) {
+        vRaf = requestAnimationFrame(reverseStep);
+        if (!vLast) vLast = ts;
+        var dt = (ts - vLast) / 1000;
+        vLast = ts;
+        if (dt > 0.25) dt = 0.25;                    // came back from a stall
+        var t = video.currentTime - dt * VIDEO_SPEED;
+        if (t <= 0) { video.currentTime = 0; reverseStop(); forward(); return; }
         video.currentTime = t;
       }
+      function reverseStart() {
+        if (vRaf) return;
+        dir = -1; vLast = 0;
+        video.pause();
+        vRaf = requestAnimationFrame(reverseStep);
+      }
+      function reverseStop() {
+        if (vRaf) { cancelAnimationFrame(vRaf); vRaf = 0; }
+      }
+      if (video) {
+        // end of the forward leg — turn around rather than stop
+        video.addEventListener('ended', function () {
+          if (vOn) reverseStart();
+        });
+      }
+      /* halt() stops the picture without forgetting that the pointer is still
+         over the stage; videoStop() is the real exit. Keeping those separate
+         matters for the tab-switch case below: pausing on hide and clearing
+         vOn at the same time left the clip dead on return, because nothing
+         restarts it until the pointer moves again — and a pointer already
+         parked on the hero never fires another move. */
+      function halt() {
+        if (!video) return;
+        reverseStop();
+        video.pause();
+      }
+      function resume() {
+        if (!video) return;
+        if (dir === 1) forward(); else reverseStart();
+      }
       function videoStart() {
-        if (!video || vRaf) return;
-        lastTs = 0;
-        vRaf = requestAnimationFrame(videoStep);
+        if (!video || vOn) return;
+        vOn = true;
+        resume();
       }
       function videoStop() {
-        if (vRaf) { cancelAnimationFrame(vRaf); vRaf = 0; }
+        if (!video) return;
+        vOn = false;
+        halt();
       }
 
       function loop() {
@@ -190,9 +233,11 @@
         videoStop();
         kick();
       });
-      // a tab switch mid-hover would otherwise leave the loop scrubbing
+      // Never decode while the tab is hidden, but come back if the pointer
+      // is still on the stage when it returns.
       document.addEventListener('visibilitychange', function () {
-        if (document.hidden) videoStop();
+        if (document.hidden) halt();
+        else if (vOn) resume();
       });
     });
   }
