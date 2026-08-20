@@ -85,6 +85,13 @@
 /* ── RESET / BASE ───────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;overflow-x:clip}
+/* The fixed header sits on top of every section (z-index:100, no reserved
+   space above the content), so a bare anchor jump lands each target's
+   heading partly hidden behind it — confirmed on #process, but every
+   nav-linked section shares the same fixed header and the same problem.
+   96px comfortably clears the header's ~72px at rest, across its own
+   responsive padding range. */
+section[id]{scroll-margin-top:6rem}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 body{
   margin:0;overflow-x:clip;
@@ -153,7 +160,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   color:var(--on-light-mute);margin-bottom:var(--sp-3);
 }
 .eyebrow--gold{color:var(--gold)}
-/* the secondary section deliberately does not get the gold label */
+/* Muted label variant — not currently used on any section (Also
+   available switched to eyebrow--gold, matching About's treatment). */
 .eyebrow--quiet{color:var(--on-dark-mute)}
 .eyebrow__spade{width:.85em;height:.85em;flex:none;fill:currentColor;margin-top:.3em}
 
@@ -164,7 +172,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .h2--light{color:var(--on-dark)}
 /* headings that live inside a half-width column need a smaller top end
    so the authored line breaks survive */
-.about__copy .h2,.cta__copy .h2{font-size:clamp(1.9rem,3.4vw,3rem)}
+.about__copy .h2{font-size:clamp(1.9rem,3.4vw,3rem)}
+/* Smaller than About's — three short lines read as heavier at the shared
+   size than the sentence warrants. */
+.cta__copy .h2{font-size:clamp(1.6rem,2.6vw,2.4rem)}
 .h3{font:400 var(--fs-h3)/1.08 var(--f-display);letter-spacing:-.02em;color:var(--on-light)}
 .h3--light{color:var(--on-dark)}
 
@@ -469,6 +480,12 @@ button,input,select,textarea{font:inherit;color:inherit}
    the halved .formats top padding this halves the whole gap between the
    CTAs and the top of the tiers tray. */
 .hero[data-hero] .hero__content{padding-bottom:clamp(2rem,4.5vh,3.5rem)}
+/* Home hero only — subpages share .hero__stage's flex-end via .hero--page
+   and should keep it. Once the choreography settles (--cy reaches 0), the
+   text was sitting low against the bottom edge; centring it reads better
+   at rest without touching the padding that controls the gap to the tray
+   below. */
+.hero[data-hero] .hero__stage{align-items:center}
 .hero__cue{
   position:absolute;right:var(--gutter);bottom:clamp(4rem,9vh,7rem);z-index:2;
   display:none;align-items:center;gap:.75rem;opacity:var(--cue);
@@ -756,7 +773,13 @@ button,input,select,textarea{font:inherit;color:inherit}
   gap:clamp(2.5rem,5vw,5rem);align-items:start}
 /* The portrait plate stays dark by design, so only its frame follows the
    section — a --line-dark edge would vanish into the cream around it. */
-.portrait{position:relative;overflow:hidden;border:1px solid var(--ink-600)}
+/* Pushed down to clear the eyebrow AND the heading above the copy
+   column: with align-items:start the grid lines up the image with the
+   eyebrow label at the very top of the column, not with the first line
+   of actual body copy several elements down. Measured at desktop width;
+   the h2 above uses a vw-based clamp, so this drifts slightly at other
+   viewport widths rather than holding exactly everywhere. */
+.portrait{position:relative;overflow:hidden;border:1px solid var(--ink-600);margin-top:12.13rem}
 .portrait__art{
   position:relative;aspect-ratio:4/5;
   background:
@@ -1057,7 +1080,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .plaque::after{bottom:-1px;right:-1px;border-bottom-width:1px;border-right-width:1px}
 
 .plaque__brow{justify-content:center;margin-bottom:var(--sp-2)}
-.plaque__h{margin-bottom:var(--sp-3)}
+/* Never actually carried a heading treatment before — the h2 in the
+   markup had no class, so it rendered at browser-default size (25.5px)
+   with no spacing of its own. Full section h2 scale, not scaled down —
+   the smaller size read as too quiet against the rest of the page's
+   headings. Given real headroom above it, on top of the plaque's own
+   padding. */
+.plaque__h{margin-top:var(--sp-3);margin-bottom:var(--sp-3)}
 .plaque__lede{
   max-width:52ch;margin-inline:auto;
   font-size:var(--fs-lead);color:var(--on-dark-mute);
@@ -1270,7 +1299,10 @@ button,input,select,textarea{font:inherit;color:inherit}
    room to breathe, and motion not refused by the visitor.      */
 @media (min-width:901px) and (pointer:fine){
   @media (prefers-reduced-motion:no-preference){
-    .js .hero{height:200vh}
+    /* Reduced from 200vh — the beats still land clearly (still several
+       wheel notches apiece), it just takes noticeably less scrolling to
+       clear the hero. */
+    .js .hero{height:150vh}
     .js .hero__stage{position:sticky;top:0;height:100vh;min-height:100vh}
     .js .hero__cue{display:flex}
     .js .hero__content{padding-top:7rem;padding-bottom:clamp(4.5rem,10vh,7rem)}
@@ -1369,3 +1401,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 .hero__back svg{width:1.1em;height:1.1em;flex:none;transform:rotate(180deg)}
 .hero__back:hover{color:var(--gold)}
+/* Bottom copy: pages with several paragraphs and multiple button rows lose
+   the top Back link off-screen well before the visitor reaches the end,
+   with no footer to land on after — landing there felt like a dead end.
+   Repeats the same link at the close of the content. */
+.hero__back--bottom{margin-top:var(--sp-4);margin-bottom:0}
