@@ -465,6 +465,10 @@ button,input,select,textarea{font:inherit;color:inherit}
   display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-4);
   opacity:var(--o4);transform:translate3d(0,var(--y4),0);
 }
+/* Home hero only: half the original clamp(4rem,9vh,7rem). Together with
+   the halved .formats top padding this halves the whole gap between the
+   CTAs and the top of the tiers tray. */
+.hero[data-hero] .hero__content{padding-bottom:clamp(2rem,4.5vh,3.5rem)}
 .hero__cue{
   position:absolute;right:var(--gutter);bottom:clamp(4rem,9vh,7rem);z-index:2;
   display:none;align-items:center;gap:.75rem;opacity:var(--cue);
@@ -574,7 +578,12 @@ button,input,select,textarea{font:inherit;color:inherit}
    a stray hairline. */
 .formats{
   background:transparent;color:var(--on-dark);
-  padding-top:clamp(3.5rem,7vw,6rem);
+  /* Halved from clamp(3.5rem,7vw,6rem) — this padding is the whole gap
+     between the hero CTAs and the top of the tray. */
+  padding-top:clamp(1.75rem,3.5vw,3rem);
+  /* Halved from the --sp-sec default; pairs with .process' halved top
+     padding to halve the gap into "Four steps". */
+  padding-bottom:clamp(1.5rem,3vw,3rem);
 }
 /* Inside the tray now: a grid item, so it needs to span the row or it drops
    into column one and reads as a fourth card. */
@@ -605,7 +614,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .quotes{
   background:var(--ink-900);
   border:1px solid var(--line-dark);
-  padding:clamp(4.25rem,6.8vw,5.5rem);
+  /* Same inset as the tiers tray, and equal on all four sides — the old
+     88px squeezed the cards for no gain. */
+  padding:clamp(2.5rem,4.5vw,4rem);
+  /* ~6px wider than .wrap allows, matching the tiers tray */
+  margin-inline:-3px;
 }
 /* The tray is back. It sits on the same black as the section, so the border
    is what draws it — that reads as a framed panel rather than a floating
@@ -613,7 +626,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tiers{
   background:var(--ink-900);
   border:1px solid var(--line-dark);
-  padding:clamp(2.5rem,4.5vw,4rem);
+  /* Top and bottom insets are the same measure, and both match the gap
+     above the tray, so the frame reads as one consistent margin. Sides
+     keep the wider original figure. */
+  padding:clamp(1.25rem,2.25vw,2rem) clamp(2.5rem,4.5vw,4rem);
+  /* ~6px wider than .wrap allows, without moving --maxw for the whole page */
+  margin-inline:-3px;
 }
 /* The two outer tiers are cream cards on the black section; .tier--lead below
    stays dark, so the trio reads light / dark / light. */
@@ -696,7 +714,9 @@ button,input,select,textarea{font:inherit;color:inherit}
    would drop into column one and read as a fourth card. */
 .formats__foot{
   grid-column:1/-1;
-  margin-top:clamp(2rem,4vw,3rem);
+  /* matches padding-top below — the divider sits centred between the cards
+     and the copy rather than hugging the copy */
+  margin-top:var(--sp-3);
   padding-top:var(--sp-3);
   border-top:1px solid var(--line-dark);
   font-size:var(--fs-sm);color:var(--on-dark-mute);max-width:62ch;
@@ -713,7 +733,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* ═══ 6. PROCESS ══════════════════════════════════════════════ */
 /* Pulled up: #formats above is black too, so the usual full section gap
    between them just reads as dead space rather than as a separation. */
-.process{background:transparent;padding-top:clamp(2rem,4vw,3.25rem)}
+.process{background:transparent;padding-top:clamp(1rem,2vw,1.625rem)}
 .process__head{margin-bottom:clamp(3rem,6vw,4.5rem)}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 .step{padding:0 var(--sp-3);border-left:1px solid var(--line-dark)}
@@ -770,7 +790,17 @@ button,input,select,textarea{font:inherit;color:inherit}
    family as About/Results (transparent ground, cream text via the
    --on-light remap), just body copy with no image or card grid. */
 .network{background:transparent;color:var(--on-light)}
-.network__head{max-width:52ch;margin-bottom:clamp(2rem,4vw,3rem)}
+/* Halved from the --sp-sec default; pairs with .also' halved top padding
+   to halve the gap into "Also available". */
+.network{padding-bottom:clamp(1.5rem,3vw,3rem)}
+/* No max-width: the heading is one line by design and the 52ch cap was
+   folding it to three. At the shared --fs-h2 it still needed 1159px in a
+   1144px column, so this one heading is sized to hold on a single line. */
+.network__head{margin-bottom:clamp(2rem,4vw,3rem)}
+/* No nowrap: the clamp floor is 24px, which would need ~458px of line on a
+   375px phone and blow out the page. The size alone holds one line on
+   desktop; narrow viewports are allowed to wrap. */
+.network__head .h2{font-size:clamp(1.5rem,4.3vw,3.6rem)}
 .network__copy{max-width:68ch}
 .network__copy p{color:var(--on-light-mute);margin-bottom:var(--sp-3)}
 .network__list{margin-top:var(--sp-3)}
@@ -781,7 +811,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* ═══ 8. SECONDARY / ALSO AVAILABLE ═══════════════════════════ */
 /* Sits between a cream #about and a cream #results, so the colour change is
    the separator — the old top rule was there to split it from a grey. */
-.also{background:transparent}
+.also{background:transparent;padding-top:clamp(1.5rem,3vw,3rem);padding-bottom:clamp(1.5rem,3vw,3rem)}
 .also__head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24rem);
   gap:var(--sp-4);align-items:end;margin-bottom:clamp(2.5rem,5vw,3.5rem)}
 .also__intro{font-size:var(--fs-sm);color:var(--on-dark-mute);max-width:42ch}
@@ -953,7 +983,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 
 /* ═══ 9. RESULTS ══════════════════════════════════════════════ */
-.results{background:transparent;color:var(--on-light)}
+.results{background:transparent;color:var(--on-light);padding-top:clamp(1.5rem,3vw,3rem)}
 .results .eyebrow--gold{color:var(--gold-ink)}
 .results__head{margin-bottom:clamp(2.5rem,5vw,4rem)}
 .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3)}
@@ -1008,7 +1038,8 @@ button,input,select,textarea{font:inherit;color:inherit}
    through on the way to the form rather than another pitch. */
 /* Black between a cream #results above and the cream final CTA below, so it
    needs no rule to separate it — the colour change already does that. */
-.appt{background:transparent}
+/* 25% off the --sp-sec default, top and bottom. */
+.appt{background:transparent;padding-block:clamp(2.25rem,4.5vw,4.5rem)}
 .plaque{
   position:relative;max-width:62rem;margin-inline:auto;text-align:center;
   padding:clamp(2.5rem,5vw,4rem) clamp(1.5rem,4vw,3.5rem);
