@@ -324,8 +324,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   background:radial-gradient(78% 86% at 74% 4%,#2A2219,#0C0B0A 58%,#060505 100%);
   /* Read by the two layers below and by heroSpotlight() in main.js. Off
      canvas at rest, so nothing shows until the pointer actually enters.
-     --r is now a touch past the original clamp(160px,20vw,300px). */
-  --mx:-999px; --my:-999px; --r:clamp(175px,21vw,320px);
+     --r is 20% down from clamp(175px,21vw,320px). */
+  --mx:-999px; --my:-999px; --r:clamp(140px,16.8vw,256px);
 }
 
 /* One layer now, centred on the --mx/--my/--r the stage inherits down.
@@ -632,15 +632,25 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 .tier__name{font:400 clamp(1.35rem,2.1vw,1.75rem)/1.05 var(--f-display);
   letter-spacing:-.02em;color:var(--on-light)}
+/* "The Invested Aces Mastermind (I AM)" is the longest of the three names
+   by a wide margin and was wrapping to four lines at the shared size,
+   throwing the card's rhythm off against its shorter neighbours. Sized
+   down for length, not because this card is secondary. */
+.tier--lead .tier__name{font-size:clamp(1.15rem,1.7vw,1.4rem)}
 .tier__pitch{margin-top:.85rem;font-size:var(--fs-sm);color:var(--on-light-mute)}
 
 .spec{margin-block:var(--sp-3) var(--sp-4);flex:1}
-.spec>div{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:var(--sp-2);
+/* Label above value, not beside it. Side-by-side at a fixed 8.5rem label
+   column left too little room in a three-across card: a value like
+   "In person, on phone, or online" wrapped to three lines and ran past
+   its row into the next label. Stacking removes the narrow column
+   entirely, so the value gets the card's full width to wrap into. */
+.spec>div{display:grid;grid-template-columns:1fr;gap:.3rem;
   padding-block:.7rem;border-top:1px solid var(--line-light)}
 .spec dt{
   font-family:var(--f-util);font-variation-settings:"wdth" 112;
   font-size:var(--fs-label);font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--on-light-mute);padding-top:.1em;
+  color:var(--on-light-mute);
 }
 .spec dd{margin:0;font-size:var(--fs-sm);color:var(--on-light)}
 /* specificity: must out-rank `.spec dd` (0,1,1) and `.tier--lead .spec dd` (0,2,1) */
@@ -832,24 +842,38 @@ button,input,select,textarea{font:inherit;color:inherit}
    turns to mud rather than light. On ink (.alsotile, above) it can
    spread, because there is contrast to burn. */
 @media (hover:hover){
-  .tier,.quote,.portrait{
+  /* Everything that is a surface, a control or a picture now lifts on the
+     same curve: cards, trays, the form, tiles, the plaque, process steps,
+     buttons, standalone links and images. One rule so nothing drifts out
+     of step, and so the whole page answers the cursor identically. */
+  .tier,.quote,.portrait,
+  .tiers,.quotes,.form,
+  .alsotile,.plaque,.step,
+  .btn,
+  .nav__list a,.foot__grid a,.tlink,.cta__meta a{
     transition:transform var(--t-mid) var(--ease),
-               box-shadow var(--t-mid) var(--ease);
-  }
-  /* Trays and the contact form glow too, but they do not lift — a panel
-     that big rising off the page reads as the layout breaking rather than
-     as depth. They get the halo only; the cards keep halo plus lift. */
-  .tiers,.quotes,.form{
-    transition:box-shadow var(--t-mid) var(--ease),
+               box-shadow var(--t-mid) var(--ease),
                border-color var(--t-mid) var(--ease);
   }
-  .tiers:hover,.quotes:hover,.form:hover{
-    border-color:rgba(217,164,65,.45);
-    box-shadow:0 0 0 1px rgba(217,164,65,.30),
-               0 0 40px -6px rgba(217,164,65,.30),
-               0 0 90px 8px rgba(217,164,65,.14);
+  /* .btn already carried its own transition for the colour swap; folding
+     transform and shadow in above would drop those, so they are restated. */
+  .btn{
+    transition:transform var(--t-mid) var(--ease),
+               box-shadow var(--t-mid) var(--ease),
+               background-color var(--t-mid) var(--ease),
+               color var(--t-mid) var(--ease),
+               border-color var(--t-mid) var(--ease);
   }
-  .tier:hover,.quote:hover,.portrait:hover{
+  /* Inline links inside body copy are left out on purpose: transform does
+     not apply to a non-replaced inline box, and forcing inline-block to
+     make it work re-flows the line it sits in. */
+  .nav__list a,.foot__grid a,.tlink,.cta__meta a{display:inline-block}
+
+  .tier:hover,.quote:hover,.portrait:hover,
+  .tiers:hover,.quotes:hover,.form:hover,
+  .alsotile:hover,.plaque:hover,.step:hover,
+  .btn:hover,
+  .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
     transform:translateY(-6px);
     /* the 0-offset ring stands in for a border change: .quote's 2px gold
        top rule and .tier--lead's dark edge both live on border-color, so
@@ -859,6 +883,21 @@ button,input,select,textarea{font:inherit;color:inherit}
                0 0 64px 4px rgba(217,164,65,.22),
                0 24px 42px -20px rgba(20,18,15,.44);
   }
+  /* Trays are large, so the halo is dialled back and spread wider — the
+     card dose at panel size reads as a lit rectangle rather than depth.
+     They lift on the same 6px as everything else. */
+  .tiers:hover,.quotes:hover,.form:hover{
+    border-color:rgba(217,164,65,.45);
+    box-shadow:0 0 0 1px rgba(217,164,65,.30),
+               0 0 40px -6px rgba(217,164,65,.30),
+               0 0 90px 8px rgba(217,164,65,.14);
+  }
+  /* Links and buttons are small; the card halo swamps them. */
+  .btn:hover,
+  .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
+    box-shadow:0 0 18px -4px rgba(217,164,65,.45),
+               0 10px 18px -12px rgba(20,18,15,.5);
+  }
 }
 /* Must stay AFTER the lifts above, not before: these selectors tie on
    specificity with the :hover rules, so source order is the only thing
@@ -866,8 +905,13 @@ button,input,select,textarea{font:inherit;color:inherit}
    gets the movement anyway. The glow is kept — it is a colour change,
    not motion. */
 @media (prefers-reduced-motion:reduce){
-  .alsotile:hover,.tier:hover,.quote:hover,.portrait:hover{transform:none}
-  /* trays and .form only ever glow, so there is no transform to cancel */
+  .tier:hover,.quote:hover,.portrait:hover,
+  .tiers:hover,.quotes:hover,.form:hover,
+  .alsotile:hover,.plaque:hover,.step:hover,
+  .btn:hover,
+  .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
+    transform:none;
+  }
 }
 
 /* ═══ 9. RESULTS ══════════════════════════════════════════════ */
@@ -1129,18 +1173,6 @@ button,input,select,textarea{font:inherit;color:inherit}
   font-size:var(--fs-label);letter-spacing:.14em;text-transform:uppercase;
   color:#8B857C;
 }
-/* Full-width closing line, above the copyright rule. */
-.foot__line{
-  display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-2);
-  padding-bottom:var(--sp-3);
-  font-size:var(--fs-lead);line-height:1.5;font-style:italic;
-  color:var(--on-dark);
-}
-.foot__line-by{
-  font-family:var(--f-util);font-variation-settings:"wdth" 112;
-  font-size:var(--fs-label);font-style:normal;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--gold);
-}
 .foot__base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-2);
   padding-top:var(--sp-3);border-top:1px solid var(--line-dark);
   font-size:.8125rem;color:#8B857C}
@@ -1206,7 +1238,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   .step:first-child{border-top:0;padding-top:0}
   .also__grid{grid-template-columns:1fr}
   .form{grid-template-columns:1fr}
-  .spec>div,.cta__meta>div{grid-template-columns:1fr;gap:.25rem}
+  .cta__meta>div{grid-template-columns:1fr;gap:.25rem}   /* .spec>div is already stacked at every width */
   .foot__grid{grid-template-columns:1fr}
   .proof__head{flex-direction:column;align-items:flex-start}
 }
