@@ -577,12 +577,67 @@
     });
   }
 
+  /* ── PAGE SPADE REVEAL ──────────────────────────────────────────
+     The hero's spotlight, taken page-wide. One fixed layer of gold is
+     appended to the body (rather than authored into each page's markup,
+     so all five stay in step), and the spade-shaped mask tracks the
+     cursor across the whole document.
+
+     Same guards as the hero: no pointer to follow on touch, and reduced
+     motion drops it entirely, so the layer is never even created. */
+  function pageSpade() {
+    if (reduce.matches || !window.matchMedia('(hover: hover)').matches) return;
+
+    var layer = document.createElement('div');
+    layer.className = 'aop';
+    layer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(layer);
+
+    var raw = { x: -999, y: -999 };
+    var smooth = { x: -999, y: -999 };
+    var running = false, on = false;
+
+    function frame() {
+      smooth.x += (raw.x - smooth.x) * 0.18;
+      smooth.y += (raw.y - smooth.y) * 0.18;
+      layer.style.setProperty('--gx', smooth.x.toFixed(1) + 'px');
+      layer.style.setProperty('--gy', smooth.y.toFixed(1) + 'px');
+      if (Math.abs(raw.x - smooth.x) < 0.5 && Math.abs(raw.y - smooth.y) < 0.5) {
+        running = false;
+        return;
+      }
+      requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
+      raw.x = e.clientX;
+      raw.y = e.clientY;
+      /* Snap on the first move. Lerping from the off-canvas rest position
+         would fly the spade in across the whole viewport. */
+      if (!on) {
+        on = true;
+        smooth.x = raw.x;
+        smooth.y = raw.y;
+        layer.classList.add('is-on');
+      }
+      if (!running) { running = true; requestAnimationFrame(frame); }
+    }, { passive: true });
+
+    // fade out when the cursor leaves the window entirely
+    document.addEventListener('mouseleave', function () {
+      on = false;
+      layer.classList.remove('is-on');
+    });
+  }
+
   /* ── boot ──────────────────────────────────────────────────── */
   function init() {
     var y = document.querySelector('[data-year]');
     if (y) y.textContent = new Date().getFullYear();
     heroChoreography();
     heroSpotlight();
+    pageSpade();
     flagshipReveal();
     alsoTileBloom();
     proofCounters();
