@@ -704,11 +704,6 @@ button,input,select,textarea{font:inherit;color:inherit}
    down for length, not because this card is secondary. */
 .tier--lead .tier__name{font-size:clamp(1.15rem,1.7vw,1.4rem)}
 .tier__pitch{margin-top:.85rem;font-size:var(--fs-sm);color:var(--on-light-mute)}
-/* A Meeting is the only tier that needs a caveat below its spec list — the
-   fee-credit note. Smaller and dimmer than the pitch so it reads as a
-   footnote, not a fourth spec row. */
-.tier__note{margin-top:.6rem;font-size:.8125rem;line-height:1.5;color:var(--on-light-mute);opacity:.85}
-.tier--lead .tier__note{color:#B8B2A8}
 
 .spec{margin-block:var(--sp-3) var(--sp-4);flex:1}
 /* Label above value, not beside it. Side-by-side at a fixed 8.5rem label
