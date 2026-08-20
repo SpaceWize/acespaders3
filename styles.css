@@ -1148,8 +1148,13 @@ button,input,select,textarea{font:inherit;color:inherit}
    showing through since .aop sits at z-index:0, below every section. */
 .foot{background:var(--ink-900);border-top:1px solid var(--line-dark);
   padding-block:clamp(3rem,6vw,5rem) 2rem}
-.foot__grid{display:grid;grid-template-columns:1.4fr repeat(5,1fr);gap:var(--sp-4);
+.foot__grid{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:var(--sp-4);
   padding-bottom:var(--sp-5)}
+/* Pairs "The work"+"Make Life better" and "Start"+"My Webmaster" into
+   one grid cell each, stacked — the second nav in each pair sits below
+   the end of the first's list rather than beside it as its own column. */
+.foot__col{display:flex;flex-direction:column}
+.foot__nav--stacked{margin-top:var(--sp-4)}
 .brand__mark--lg{width:40px;height:40px;margin-bottom:var(--sp-2)}
 .brand__mark--lg svg{width:20px;height:20px}
 .foot__word{font:400 1.35rem/1 var(--f-display);letter-spacing:.02em;color:var(--on-dark)}
@@ -1218,9 +1223,9 @@ button,input,select,textarea{font:inherit;color:inherit}
   .terms{grid-template-columns:1fr;gap:var(--sp-3)}
 }
 
-/* Six children: three tracks give two full rows rather than a ragged one. */
+/* Four children: two tracks give a clean 2x2 instead of a 3-then-1 row. */
 @media (max-width:1100px){
-  .foot__grid{grid-template-columns:repeat(3,1fr)}
+  .foot__grid{grid-template-columns:repeat(2,1fr)}
 }
 
 @media (max-width:900px){

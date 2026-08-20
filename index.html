@@ -205,8 +205,7 @@
 <section class="section about" id="about" aria-labelledby="about-h">
   <div class="wrap about__grid">
     <figure class="portrait">
-      <!-- Swap in the real portrait: .portrait__art { --plate-src: url('assets/ace.jpg'); } -->
-      <div class="portrait__art"></div>
+      <div class="portrait__art" style="--plate-src:url('assets/images/about-portrait.jpg')"></div>
       <div class="grain" aria-hidden="true"></div>
       <figcaption class="portrait__cap">Matthew Ferguson AKA "Ace Spaders"</figcaption>
     </figure>
@@ -467,23 +466,25 @@ Activity locations are private and only shared with group and mastermind members
           <span class="foot__addr-note">By appointment only</span>
         </address>
       </div>
-      <nav class="foot__nav" aria-label="The work">
-        <p class="foot__h">The work</p>
-        <ul>
-          <li><a href="mastermind-membership.html">The Invested Aces Mastermind</a></li>
-          <li><a href="group-activities.html">Ace’s Group Activities</a></li>
-          <li><a href="#contact">Project management</a></li>
-          <li><a href="#contact">Representation</a></li>
-          <li><a href="#contact">Facilitation</a></li>
-        </ul>
-      </nav>
+      <div class="foot__col">
+        <nav class="foot__nav" aria-label="The work">
+          <p class="foot__h">The work</p>
+          <ul>
+            <li><a href="mastermind-membership.html">The Invested Aces Mastermind</a></li>
+            <li><a href="group-activities.html">Ace’s Group Activities</a></li>
+            <li><a href="#contact">Project management</a></li>
+            <li><a href="#contact">Representation</a></li>
+            <li><a href="#contact">Facilitation</a></li>
+          </ul>
+        </nav>
 
-      <nav class="foot__nav" aria-label="Make Life better">
-        <p class="foot__h">Make Life better</p>
-        <ul>
-          <li><a href="https://makelifebetter.today" target="_blank" rel="noopener noreferrer">makelifebetter.today</a></li>
-        </ul>
-      </nav>
+        <nav class="foot__nav foot__nav--stacked" aria-label="Make Life better">
+          <p class="foot__h">Make Life better</p>
+          <ul>
+            <li><a href="https://makelifebetter.today" target="_blank" rel="noopener noreferrer">makelifebetter.today</a></li>
+          </ul>
+        </nav>
+      </div>
 
       <nav class="foot__nav" aria-label="Also available">
         <p class="foot__h">Also available</p>
@@ -500,21 +501,23 @@ Activity locations are private and only shared with group and mastermind members
         </ul>
       </nav>
 
-      <nav class="foot__nav" aria-label="Start">
-        <p class="foot__h">Start</p>
-        <ul>
-          <li><a href="#contact">Join the Mastermind</a></li>
-          <li><a href="#contact">Book an Assessment Call</a></li>
-          <li><a href="mailto:info@acespaders.com">info@acespaders.com</a></li>
-        </ul>
-      </nav>
+      <div class="foot__col">
+        <nav class="foot__nav" aria-label="Start">
+          <p class="foot__h">Start</p>
+          <ul>
+            <li><a href="#contact">Join the Mastermind</a></li>
+            <li><a href="#contact">Book an Assessment Call</a></li>
+            <li><a href="mailto:info@acespaders.com">info@acespaders.com</a></li>
+          </ul>
+        </nav>
 
-      <nav class="foot__nav" aria-label="My Webmaster">
-        <p class="foot__h">My Webmaster</p>
-        <ul>
-          <li><a href="https://spacewize.github.io/spacewize" target="_blank" rel="noopener noreferrer">spacewize.github.io<wbr>/spacewize</a></li>
-        </ul>
-      </nav>
+        <nav class="foot__nav foot__nav--stacked" aria-label="My Webmaster">
+          <p class="foot__h">My Webmaster</p>
+          <ul>
+            <li><a href="https://spacewize.github.io/spacewize" target="_blank" rel="noopener noreferrer">spacewize.github.io<wbr>/spacewize</a></li>
+          </ul>
+        </nav>
+      </div>
     </div>
 
     <div class="foot__base">
