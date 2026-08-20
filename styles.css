@@ -242,6 +242,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn--ghost{border-color:rgba(241,237,230,.34);color:var(--on-dark)}
 .btn--ghost:hover{border-color:var(--gold);color:var(--gold)}
 .btn--outline{border-color:var(--line-light);color:var(--on-light)}
+/* A button-shaped label for a destination that doesn't exist yet — a real
+   <a href="#"> here would silently jump the page to top, which reads as
+   broken. This is inert on purpose: no href, no hover motion, dimmed. */
+.btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed;pointer-events:none}
 .btn--outline:hover{border-color:var(--gold-ink);color:var(--gold-ink)}
 
 /* text link */
@@ -442,6 +446,21 @@ button,input,select,textarea{font:inherit;color:inherit}
    the gap goes between siblings rather than on the element — otherwise the
    home hero gains a trailing space that throws off its beat spacing. */
 .hero__sub + .hero__sub{margin-top:var(--sp-2)}
+/* A short bulleted list inside hero copy — Premium Pickup & Transport and
+   Public Speaking both need one for their "ways to access this" lines.
+   Kept to the hero's own type scale rather than borrowing a denser list
+   style built for a boxed section. */
+.hero__list{
+  max-width:56ch;margin-top:var(--sp-2);
+  opacity:var(--o3);transform:translate3d(0,var(--y3),0);
+}
+.hero__list li{
+  position:relative;padding-left:1.15em;
+  font-size:var(--fs-lead);color:#CFC9C0;line-height:1.6;
+}
+.hero__list li+li{margin-top:.35rem}
+.hero__list li::before{content:"—";position:absolute;left:0;color:var(--gold)}
+.hero--page .hero__list{max-width:62ch}
 .hero__cta{
   display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-4);
   opacity:var(--o4);transform:translate3d(0,var(--y4),0);
@@ -638,6 +657,11 @@ button,input,select,textarea{font:inherit;color:inherit}
    down for length, not because this card is secondary. */
 .tier--lead .tier__name{font-size:clamp(1.15rem,1.7vw,1.4rem)}
 .tier__pitch{margin-top:.85rem;font-size:var(--fs-sm);color:var(--on-light-mute)}
+/* A Meeting is the only tier that needs a caveat below its spec list — the
+   fee-credit note. Smaller and dimmer than the pitch so it reads as a
+   footnote, not a fourth spec row. */
+.tier__note{margin-top:.6rem;font-size:.8125rem;line-height:1.5;color:var(--on-light-mute);opacity:.85}
+.tier--lead .tier__note{color:#B8B2A8}
 
 .spec{margin-block:var(--sp-3) var(--sp-4);flex:1}
 /* Label above value, not beside it. Side-by-side at a fixed 8.5rem label
@@ -740,6 +764,19 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 .about__copy p{color:var(--on-light-mute);margin-bottom:var(--sp-2);max-width:56ch}
 .about__copy .h2{margin-bottom:var(--sp-3)}
+
+/* ═══ 7b. NETWORK ═════════════════════════════════════════════ */
+/* Narrative section between About and the Reservoir tiles — same "light"
+   family as About/Results (transparent ground, cream text via the
+   --on-light remap), just body copy with no image or card grid. */
+.network{background:transparent;color:var(--on-light)}
+.network__head{max-width:52ch;margin-bottom:clamp(2rem,4vw,3rem)}
+.network__copy{max-width:68ch}
+.network__copy p{color:var(--on-light-mute);margin-bottom:var(--sp-3)}
+.network__list{margin-top:var(--sp-3)}
+.network__list li{position:relative;padding-left:1.15em;color:var(--on-light-mute);line-height:1.6}
+.network__list li+li{margin-top:.5rem}
+.network__list li::before{content:"—";position:absolute;left:0;color:var(--gold-ink)}
 
 /* ═══ 8. SECONDARY / ALSO AVAILABLE ═══════════════════════════ */
 /* Sits between a cream #about and a cream #results, so the colour change is
