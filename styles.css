@@ -842,13 +842,14 @@ button,input,select,textarea{font:inherit;color:inherit}
    turns to mud rather than light. On ink (.alsotile, above) it can
    spread, because there is contrast to burn. */
 @media (hover:hover){
-  /* Everything that is a surface, a control or a picture now lifts on the
-     same curve: cards, trays, the form, tiles, the plaque, process steps,
-     buttons, standalone links and images. One rule so nothing drifts out
-     of step, and so the whole page answers the cursor identically. */
+  /* Everything that is a surface, a control or a picture lifts on the
+     same curve: cards, trays, the form, tiles, the plaque, buttons,
+     standalone links and images. One rule so nothing drifts out of step.
+     Four Steps is deliberately left out — those items are a numbered
+     sequence to read down, not cards to interact with individually. */
   .tier,.quote,.portrait,
-  .tiers,.quotes,.form,
-  .alsotile,.plaque,.step,
+  .tiers,.quotes,.form,.cta__copy,
+  .alsotile,.plaque,
   .btn,
   .nav__list a,.foot__grid a,.tlink,.cta__meta a{
     transition:transform var(--t-mid) var(--ease),
@@ -870,8 +871,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   .nav__list a,.foot__grid a,.tlink,.cta__meta a{display:inline-block}
 
   .tier:hover,.quote:hover,.portrait:hover,
-  .tiers:hover,.quotes:hover,.form:hover,
-  .alsotile:hover,.plaque:hover,.step:hover,
+  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover,
+  .alsotile:hover,.plaque:hover,
   .btn:hover,
   .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
     transform:translateY(-6px);
@@ -886,7 +887,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   /* Trays are large, so the halo is dialled back and spread wider — the
      card dose at panel size reads as a lit rectangle rather than depth.
      They lift on the same 6px as everything else. */
-  .tiers:hover,.quotes:hover,.form:hover{
+  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover{
     border-color:rgba(217,164,65,.45);
     box-shadow:0 0 0 1px rgba(217,164,65,.30),
                0 0 40px -6px rgba(217,164,65,.30),
@@ -906,8 +907,8 @@ button,input,select,textarea{font:inherit;color:inherit}
    not motion. */
 @media (prefers-reduced-motion:reduce){
   .tier:hover,.quote:hover,.portrait:hover,
-  .tiers:hover,.quotes:hover,.form:hover,
-  .alsotile:hover,.plaque:hover,.step:hover,
+  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover,
+  .alsotile:hover,.plaque:hover,
   .btn:hover,
   .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
     transform:none;
@@ -974,7 +975,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .plaque{
   position:relative;max-width:62rem;margin-inline:auto;text-align:center;
   padding:clamp(2.5rem,5vw,4rem) clamp(1.5rem,4vw,3.5rem);
-  border:1px solid var(--line-dark);
+  /* Opaque, same reasoning as the footer: .appt (its section) is
+     transparent so the page-wide spade reveal can pass through, but the
+     plaque itself is a bordered panel and the spade showing through it
+     read as a mistake rather than the intended page-ground effect. */
+  background:var(--ink-900);border:1px solid var(--line-dark);
 }
 /* engraved corner ticks, opposite corners only */
 .plaque::before,.plaque::after{
@@ -1018,6 +1023,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cta{background:transparent;color:var(--on-light)}
 .cta__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
   gap:clamp(2.5rem,5vw,5rem);align-items:start}
+/* Same panel treatment as .form beside it, so "Start here" reads as the
+   other half of one paired unit rather than loose copy floating next to
+   a boxed form. */
+.cta__copy{
+  background:var(--ink-900);border:1px solid var(--line-dark);
+  padding:clamp(1.5rem,3vw,2.5rem);
+}
 .cta__lede{margin-top:var(--sp-3);font-size:var(--fs-lead);color:var(--on-light-mute);
   max-width:48ch}
 .cta__meta{margin-top:var(--sp-4);display:grid;gap:0}
@@ -1131,7 +1143,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .mailpick__note{font-size:.8125rem;color:var(--on-dark-mute);max-width:52ch}
 
 /* ═══ 11. FOOTER ══════════════════════════════════════════════ */
-.foot{background:transparent;border-top:1px solid var(--line-dark);
+/* Opaque again: the page-wide spade reveal is meant for the body copy
+   sections, not the footer — an opaque ground here blocks it from
+   showing through since .aop sits at z-index:0, below every section. */
+.foot{background:var(--ink-900);border-top:1px solid var(--line-dark);
   padding-block:clamp(3rem,6vw,5rem) 2rem}
 .foot__grid{display:grid;grid-template-columns:1.4fr repeat(5,1fr);gap:var(--sp-4);
   padding-bottom:var(--sp-5)}
