@@ -472,6 +472,18 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__list li+li{margin-top:.35rem}
 .hero__list li::before{content:"—";position:absolute;left:0;color:var(--gold)}
 .hero--page .hero__list{max-width:62ch}
+/* Group Activities links each item in its "currently available" list
+   straight to that activity's own page. */
+.hero__list a{color:var(--gold);text-decoration:underline;text-underline-offset:.25em}
+.hero__list a:hover{color:var(--gold-hi)}
+/* A subhead inside hero copy, for pages long enough to need one (Group
+   Activities' "Currently Available" / "In Development" split). Sits
+   between the h1 and body-text scale — a full h2 would compete with the
+   page's own title. */
+.hero__h3{
+  font:400 clamp(1.3rem,2vw,1.7rem)/1.15 var(--f-display);
+  color:var(--on-dark);margin:var(--sp-4) 0 var(--sp-2);
+}
 .hero__cta{
   display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-4);
   opacity:var(--o4);transform:translate3d(0,var(--y4),0);
@@ -1384,7 +1396,14 @@ button,input,select,textarea{font:inherit;color:inherit}
    hold everything visible at rest. heroSpotlight() only needs .hero__stage
    in the page, so the light still tracks the cursor here too. */
 .js .hero--page{height:auto}          /* beats the 200vh cinematic rule */
-.hero--page .hero__stage{min-height:100svh}
+/* The cinematic block above pins .hero__stage (sticky, 100vh, clipped) for
+   the home hero's scroll-jacked reveal. That leaks onto every .hero--page
+   subpage too, since it targets .hero__stage with no exception for the
+   page variant — on any subpage with more than one viewport of content,
+   sticky+100vh+hidden was pinning the box to the screen and clipping
+   everything past the first fold. This wins on source order (after the
+   cinematic block) and puts the stage back in normal flow. */
+.hero--page .hero__stage{position:static;height:auto;min-height:100svh;overflow:visible}
 /* No fixed header on these, so the home hero's 9rem top pad is dead space. */
 .hero--page .hero__content{padding-top:clamp(4.5rem,11vh,7rem)}
 /* Service names run longer than the home headline and are not hand-broken. */
