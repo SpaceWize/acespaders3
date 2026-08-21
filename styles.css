@@ -366,43 +366,38 @@ button,input,select,textarea{font:inherit;color:inherit}
   /* object-fit:contain letterboxes the clip inside this box whenever its
      aspect ratio doesn't match the stage — without a background here, that
      gap shows the stage's own warm gradient behind it instead of black,
-     which reads as a hard seam right where the footage ends. A solid black
-     ground plus a small fade on the right (the edge the source clip cuts
-     hardest) keeps that boundary from showing under the cursor reveal. */
+     which reads as a hard seam right where the footage ends. #0a0705 is
+     the actual measured edge-pixel colour of the current clip (sampled
+     directly from the file across 5 timestamps, consistently 9-11/6-8/5
+     — not a guess), so the letterboxed edge disappears into real footage
+     rather than an approximated tone. */
   background:
-    linear-gradient(90deg,transparent 82%,rgba(0,0,0,.9) 96%,#000 100%),
-    #000;
+    linear-gradient(90deg,transparent 82%,rgba(10,7,5,.9) 96%,#0a0705 100%),
+    #0a0705;
   /* The BOX stays the full stage on purpose: --mx/--my are cursor positions
      measured against the stage, and mask-position resolves against this
      element's border box. Shrinking the element itself threw the spade out
      of register with the cursor. Padding shrinks the picture inside a
-     full-size box instead, so the mask stays aligned. */
+     full-size box instead, so the mask stays aligned — left/right are
+     uneven on purpose, pushing the picture hard right, its edge close to
+     the stage's own right edge. */
   object-fit:contain;
-  padding:4% 7%;
-  /* the clip is graded dark; a small lift keeps the revealed picture legible
-     now that there is no bloom over it to carry brightness */
-  filter:brightness(1.16) saturate(1.05);
+  padding:6% .5% 6% 36%;
   opacity:0;
   /* The cutout is the spade itself, not a circle — the same glyph the brand
      mark and eyebrows use. An SVG mask rather than a gradient, because a
      gradient can only describe a radial falloff; the softness comes from a
      feGaussianBlur baked into the SVG, so the edge still feathers.
      --r stays the half-size, so the box is 2r square and centres on the
-     cursor exactly as the circle did. */
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cfilter id='s' x='-25%25' y='-25%25' width='150%25' height='150%25'%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Cpath filter='url(%23s)' fill='%23000' transform='translate(4 4) scale(1)' d='M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z'/%3E%3C/svg%3E"),radial-gradient(ellipse 58% 54% at 50% 50%,#000 0%,#000 46%,rgba(0,0,0,.55) 72%,transparent 100%);
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cfilter id='s' x='-25%25' y='-25%25' width='150%25' height='150%25'%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Cpath filter='url(%23s)' fill='%23000' transform='translate(4 4) scale(1)' d='M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z'/%3E%3C/svg%3E"),radial-gradient(ellipse 58% 54% at 50% 50%,#000 0%,#000 46%,rgba(0,0,0,.55) 72%,transparent 100%);
-  /* Second mask layer: a vignette, intersected with the spade. The clip is
-     letterboxed by object-fit, so without this its rectangle ends on a hard
-     line inside the aperture. Fading the edges lets it run into the black
-     and meet the vignette already baked into the footage. Two layers means
-     every mask-* property needs two values, in the same order. */
-  -webkit-mask-repeat:no-repeat,no-repeat; mask-repeat:no-repeat,no-repeat;
-  -webkit-mask-size:calc(var(--r) * 2) calc(var(--r) * 2),100% 100%;
-  mask-size:calc(var(--r) * 2) calc(var(--r) * 2),100% 100%;
-  -webkit-mask-position:calc(var(--mx) - var(--r)) calc(var(--my) - var(--r)),center;
-  mask-position:calc(var(--mx) - var(--r)) calc(var(--my) - var(--r)),center;
-  -webkit-mask-composite:source-in;   /* webkit spelling of intersect */
-  mask-composite:intersect;
+     cursor exactly as the circle did. Single layer — no vignette gradient
+     intersected with it, so the reveal cuts clean to the spade's own edge. */
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cfilter id='s' x='-25%25' y='-25%25' width='150%25' height='150%25'%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Cpath filter='url(%23s)' fill='%23000' transform='translate(4 4) scale(1)' d='M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cfilter id='s' x='-25%25' y='-25%25' width='150%25' height='150%25'%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Cpath filter='url(%23s)' fill='%23000' transform='translate(4 4) scale(1)' d='M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  -webkit-mask-size:calc(var(--r) * 2) calc(var(--r) * 2);
+  mask-size:calc(var(--r) * 2) calc(var(--r) * 2);
+  -webkit-mask-position:calc(var(--mx) - var(--r)) calc(var(--my) - var(--r));
+  mask-position:calc(var(--mx) - var(--r)) calc(var(--my) - var(--r));
   transition:opacity var(--t-mid) var(--ease);
 }
 @media (hover:hover){
@@ -426,9 +421,11 @@ button,input,select,textarea{font:inherit;color:inherit}
      already thinned to .28 — with the crisp water underneath, 12px gold fell
      to 4.08:1 there. Deepened through the mid-left so the type is protected
      without touching the field: past 62% it still drops away fast, keeping
-     the key light and the spotlight fully open on the right. */
+     the key light and the spotlight fully open on the right. Pure black now
+     (was rgba(5,5,4,...), a near-black with a faint warm cast) — same
+     falloff distances, so the text-safety tuning above still holds. */
   background:linear-gradient(90deg,
-    rgba(5,5,4,.90) 0%,rgba(5,5,4,.74) 34%,rgba(5,5,4,.22) 62%,rgba(5,5,4,0) 80%);
+    rgba(0,0,0,.90) 0%,rgba(0,0,0,.74) 34%,rgba(0,0,0,.22) 62%,rgba(0,0,0,0) 80%);
 }
 .hero__scrim::after{
   content:"";position:absolute;inset:0;
@@ -1082,7 +1079,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .appt{background:transparent;padding-block:clamp(2.25rem,4.5vw,4.5rem)}
 .plaque{
   position:relative;max-width:62rem;margin-inline:auto;text-align:center;
-  padding:clamp(2.5rem,5vw,4rem) clamp(1.5rem,4vw,3.5rem);
+  /* Bottom trimmed on its own — the top keeps the fuller measure for
+     headroom above the heading, only the gap under the button shrinks. */
+  padding:clamp(2.5rem,5vw,4rem) clamp(1.5rem,4vw,3.5rem) clamp(1.5rem,3vw,2.25rem);
   /* Opaque, same reasoning as the footer: .appt (its section) is
      transparent so the page-wide spade reveal can pass through, but the
      plaque itself is a bordered panel and the spade showing through it
@@ -1108,7 +1107,7 @@ button,input,select,textarea{font:inherit;color:inherit}
    button sat flush against the paragraph above it while the plaque's own
    bottom padding opened up a gap below. Matching that padding as
    margin-top centers the button in the gap instead of hugging the text. */
-.plaque__cta{margin-top:clamp(2.5rem,5vw,4rem)}
+.plaque__cta{margin-top:clamp(1.5rem,3vw,2.25rem)}
 /* Scoped to this one button rather than the shared .btn rule — tightens
    the border-to-text padding a bit so it reads less loose here, without
    resizing every gold button site-wide. */
