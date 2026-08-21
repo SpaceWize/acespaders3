@@ -378,11 +378,12 @@ button,input,select,textarea{font:inherit;color:inherit}
      measured against the stage, and mask-position resolves against this
      element's border box. Shrinking the element itself threw the spade out
      of register with the cursor. Padding shrinks the picture inside a
-     full-size box instead, so the mask stays aligned — left/right are
-     uneven on purpose, pushing the picture hard right, its edge close to
-     the stage's own right edge. */
+     full-size box instead, so the mask stays aligned — right stays tight
+     (picture hugs the stage's right edge) and left is pulled in a bit
+     from before to size the picture up; top is small and bottom is large,
+     pushing the picture up toward the top of the stage. */
   object-fit:contain;
-  padding:6% .5% 6% 36%;
+  padding:1% .5% 16% 30%;
   opacity:0;
   /* The cutout is the spade itself, not a circle — the same glyph the brand
      mark and eyebrows use. An SVG mask rather than a gradient, because a
