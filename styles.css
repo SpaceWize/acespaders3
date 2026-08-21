@@ -1104,6 +1104,15 @@ button,input,select,textarea{font:inherit;color:inherit}
    headings. Given real headroom above it, on top of the plaque's own
    padding. */
 .plaque__h{margin-top:var(--sp-3);margin-bottom:var(--sp-3)}
+/* Had no margin at all — inherits the site's p{margin:0} reset — so the
+   button sat flush against the paragraph above it while the plaque's own
+   bottom padding opened up a gap below. Matching that padding as
+   margin-top centers the button in the gap instead of hugging the text. */
+.plaque__cta{margin-top:clamp(2.5rem,5vw,4rem)}
+/* Scoped to this one button rather than the shared .btn rule — tightens
+   the border-to-text padding a bit so it reads less loose here, without
+   resizing every gold button site-wide. */
+.plaque__cta .btn{padding:.85rem 2.4rem;min-height:56px}
 .plaque__lede{
   max-width:52ch;margin-inline:auto;
   font-size:var(--fs-lead);color:var(--on-dark-mute);
