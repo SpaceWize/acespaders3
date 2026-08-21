@@ -680,7 +680,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   padding:clamp(1.6rem,2.6vw,2.25rem);
 }
 .tier .tier__name,.tier .spec dd{color:var(--on-paper)}
-.tier .tier__pitch,.tier .spec dt{color:var(--on-paper-mute)}
+.tier .tier__pitch{color:var(--on-paper-mute)}
+.tier .spec dt{color:var(--gold-on-paper)}
 .tier .spec>div{border-top-color:var(--line-paper)}
 .tier .spec dd.tier__inv{color:var(--gold-on-paper)}
 .tier .pips i.on{background:var(--gold-on-paper)}
@@ -695,7 +696,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tier--lead{background:var(--ink-700);border-color:rgba(217,164,65,.55);color:var(--on-dark)}
 .tier--lead .tier__name{color:var(--on-dark)}
 .tier--lead .tier__pitch{color:#B8B2A8}
-.tier--lead .spec dt{color:#8E877D}
+.tier--lead .spec dt{color:var(--gold)}
 .tier--lead .spec dd{color:var(--on-dark)}
 .tier--lead .spec>div{border-top-color:#38332D}
 
