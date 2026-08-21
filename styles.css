@@ -363,6 +363,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero__plate{
   position:absolute;inset:0;z-index:0;pointer-events:none;
   width:100%;height:100%;
+  /* object-fit:contain letterboxes the clip inside this box whenever its
+     aspect ratio doesn't match the stage — without a background here, that
+     gap shows the stage's own warm gradient behind it instead of black,
+     which reads as a hard seam right where the footage ends. A solid black
+     ground plus a small fade on the right (the edge the source clip cuts
+     hardest) keeps that boundary from showing under the cursor reveal. */
+  background:
+    linear-gradient(90deg,transparent 82%,rgba(0,0,0,.9) 96%,#000 100%),
+    #000;
   /* The BOX stays the full stage on purpose: --mx/--my are cursor positions
      measured against the stage, and mask-position resolves against this
      element's border box. Shrinking the element itself threw the spade out
