@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mastermind Application — Ace Spaders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wdth,wght@62..125,400..700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script async src="https://js.stripe.com/v3/buy-button.js"></script>
+<script>document.documentElement.classList.replace('no-js','js');</script>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0"><defs>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14M12.5 6l6 6-6 6"/></symbol>
+</defs></svg>
+
+<!-- The home hero, exactly: same stage, same spotlight, same type ramp. No
+     [data-hero], so heroChoreography() stays unbound — see styles.css.
+     One white title line, no gold second line. -->
+<section class="hero hero--page" aria-label="Mastermind Application">
+  <div class="hero__stage">
+
+    <video class="hero__plate" data-hero-video aria-hidden="true"
+           muted playsinline preload="metadata" disablepictureinpicture>
+      <source src="assets/video/cybertruck.mp4" type="video/mp4">
+    </video>
+    <div class="hero__scrim" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="hero__content">
+      <a class="hero__back" href="mastermind-membership.html"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg> Back</a>
+
+      <h1 class="hero__h1">
+        <span class="hero__line">Mastermind Application</span>
+      </h1>
+
+      <p class="hero__sub">To submit your application, you must pay the $200 application fee, covering your initial 60-minute meeting with Ace. This will be credited towards your first month’s membership dues if you are approved to join.</p>
+      <p class="hero__sub">Once we receive your payment, you will receive an email from Ace’s Assistant with questions to answer before you meet with Ace. Once you have answered the questions, Ace’s Assistant will request your availability and schedule your meeting with Ace.</p>
+
+      <div class="hero__cta">
+        <stripe-buy-button
+          buy-button-id="buy_btn_1U6gfUIy2nfF4ECQSQcCHmp1"
+          publishable-key="pk_live_51PHBn7Iy2nfF4ECQnWYPr9qgNjIa4gjXzTDU3Dmn8n8ZvRnx1F6yPyizbZ2dYhJ9BvRr2WUvmbkuH5ZYUNT95m0I00RnsDOK14"
+        >
+        </stripe-buy-button>
+      </div>
+
+      <a class="hero__back hero__back--bottom" href="mastermind-membership.html"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg> Back</a>
+    </div>
+
+  </div>
+</section>
+
+<script src="main.js" defer></script>
+</body>
+</html>
