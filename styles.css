@@ -383,7 +383,7 @@ button,input,select,textarea{font:inherit;color:inherit}
      from before to size the picture up; top is small and bottom is large,
      pushing the picture up toward the top of the stage. */
   object-fit:contain;
-  padding:1% .5% 16% 30%;
+  padding:25px .5% 16% 30%;
   opacity:0;
   /* The cutout is the spade itself, not a circle — the same glyph the brand
      mark and eyebrows use. An SVG mask rather than a gradient, because a
