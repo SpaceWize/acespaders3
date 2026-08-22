@@ -1474,13 +1474,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
 /* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
 /* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
+/* Mobile glowing light effect for cards, trays, boxes, images, and component tiles */
 @media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
-  /* Standalone image ambient glow */
+  /* Direct glow for images */
   img {
     box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
   }
 
-  /* Target containers with isolated stacking context */
+  /* Target all card, tray, box, and component containers */
+  .card,
+  .tray,
+  .box,
   .alsotile,
   .tier,
   .four__item {
@@ -1491,14 +1495,17 @@ button,input,select,textarea{font:inherit;color:inherit}
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
   }
 
-  /* Gold pulse background layer placed behind text and buttons */
+  /* Gold pulse ambient background layer */
+  .card::before,
+  .tray::before,
+  .box::before,
   .alsotile::before,
   .tier::before,
   .four__item::before {
     content: "";
     position: absolute;
     inset: -100%;
-    z-index: -1; /* Sits behind card copy without modifying child CSS */
+    z-index: -1; /* Renders behind card text and action buttons */
     background: radial-gradient(
       circle at 50% 50%,
       rgba(212, 175, 55, 0.25) 0%,
