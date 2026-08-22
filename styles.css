@@ -1476,13 +1476,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
 /* Mobile glowing light effect for cards, trays, boxes, images, and component tiles */
 /* Universal Mobile Glow for cards, trays, boxes, quotes, steps, and images */
+/* Mobile light effect for cards, trays, boxes, quotes, steps, and images */
 @media (max-width: 900px), (hover: none) {
   /* Standalone image glow */
   img {
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.35) !important;
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.4) !important;
   }
 
-  /* Target all card containers, quotes, steps, and service blocks */
+  /* Target all container elements */
   .card,
   .tray,
   .box,
@@ -1496,12 +1497,27 @@ button,input,select,textarea{font:inherit;color:inherit}
   article {
     position: relative !important;
     overflow: hidden !important;
-    isolation: isolate !important;
-    border: 1px solid rgba(212, 175, 55, 0.35) !important;
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.25) !important;
   }
 
-  /* Ambient light pulse background layer */
+  /* Elevate text and content above the light overlay */
+  .card > *,
+  .tray > *,
+  .box > *,
+  .alsotile > *,
+  .tier > *,
+  .four__item > *,
+  .step > *,
+  .way > *,
+  .talent > *,
+  blockquote > *,
+  article > * {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  /* Light pulse overlay (sits above background, below text) */
   .card::before,
   .tray::before,
   .box::before,
@@ -1515,12 +1531,12 @@ button,input,select,textarea{font:inherit;color:inherit}
   article::before {
     content: "" !important;
     position: absolute !important;
-    inset: -100% !important;
-    z-index: -1 !important;
+    inset: -50% !important;
+    z-index: 1 !important;
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(212, 175, 55, 0.3) 0%,
-      transparent 60%
+      rgba(212, 175, 55, 0.35) 0%,
+      transparent 65%
     ) !important;
     animation: mobileLightPulse 4s ease-in-out infinite alternate !important;
     pointer-events: none !important;
@@ -1529,11 +1545,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 @keyframes mobileLightPulse {
   0% {
-    opacity: 0.3;
-    transform: scale(0.95);
+    opacity: 0.25;
+    transform: scale(0.9);
   }
   100% {
     opacity: 0.85;
-    transform: scale(1.05);
+    transform: scale(1.1);
   }
 }
