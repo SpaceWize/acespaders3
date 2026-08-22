@@ -203,41 +203,58 @@ button,input,select,textarea{font:inherit;color:inherit}
    unsupported the arc simply sits still, which is why the ring is drawn
    in the button's own accent: a stationary version still reads as trim
    rather than as something broken. */
-@property --btn-a{syntax:'<angle>';initial-value:0deg;inherits:false}
+@property --orbit-a{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes orbitSpin{to{--orbit-a:360deg}}
 
-.btn{position:relative;isolation:isolate;--btn-glow:var(--gold-hi)}
+/* Everything that reads as a surface or a control carries the ring: the
+   buttons it started on, plus trays, cards, boxes and framed images.
+   One selector list so the arcs stay identical everywhere. */
+.btn,
+.tier,.quote,.tiers,.quotes,.form,.cta__copy,.cta__shot,
+.alsotile,.plaque,.portrait{
+  position:relative;isolation:isolate;--orbit-glow:var(--gold-hi);
+}
 /* gold on gold is invisible — the filled button gets a pale arc instead */
-.btn--gold{--btn-glow:#FFF6E0}
+.btn--gold{--orbit-glow:#FFF6E0}
+/* The cream tiers are light surfaces; the pale arc vanishes on them, so
+   they take the deeper gold that already passes on cream elsewhere. */
+.tier:not(.tier--lead){--orbit-glow:var(--gold-on-paper)}
 
-.btn::after{
+.btn::after,
+.tier::after,.quote::after,.tiers::after,.quotes::after,.form::after,
+.cta__copy::after,.cta__shot::after,.alsotile::after,.plaque::after,
+.portrait::after{
   content:"";position:absolute;inset:0;border-radius:inherit;
   pointer-events:none;padding:2px;
-  background:conic-gradient(from var(--btn-a),
+  background:conic-gradient(from var(--orbit-a),
     transparent 0deg,
     transparent 62deg,
-    color-mix(in srgb,var(--btn-glow) 35%,transparent) 82deg,
-    var(--btn-glow) 96deg,
-    color-mix(in srgb,var(--btn-glow) 35%,transparent) 110deg,
+    color-mix(in srgb,var(--orbit-glow) 35%,transparent) 82deg,
+    var(--orbit-glow) 96deg,
+    color-mix(in srgb,var(--orbit-glow) 35%,transparent) 110deg,
     transparent 130deg,
     transparent 360deg);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;
   mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   mask-composite:exclude;
-  animation:btnOrbit 2.8s linear infinite;
+  animation:orbitSpin 2.8s linear infinite;
 }
 /* The ring alone is a hairline. This is the same arc, blurred and pushed
    past the edge, which is what turns it from trim into a glow. Sits behind
-   the button's own background so it only ever shows outside the box. */
+   the button's own background so it only ever shows outside the box.
+   Buttons only: this layer is a blur per element, and running ~30 of them
+   across the page is what makes the effect expensive, so the surfaces
+   take the sharp ring alone. */
 .btn::before{
   content:"";position:absolute;inset:-3px;border-radius:inherit;
   pointer-events:none;padding:4px;z-index:-1;
-  background:conic-gradient(from var(--btn-a),
+  background:conic-gradient(from var(--orbit-a),
     transparent 0deg,
     transparent 62deg,
-    color-mix(in srgb,var(--btn-glow) 30%,transparent) 82deg,
-    var(--btn-glow) 96deg,
-    color-mix(in srgb,var(--btn-glow) 30%,transparent) 110deg,
+    color-mix(in srgb,var(--orbit-glow) 30%,transparent) 82deg,
+    var(--orbit-glow) 96deg,
+    color-mix(in srgb,var(--orbit-glow) 30%,transparent) 110deg,
     transparent 130deg,
     transparent 360deg);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
@@ -245,9 +262,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   mask-composite:exclude;
   filter:blur(5px);opacity:.85;
-  animation:btnOrbit 2.8s linear infinite;
+  animation:orbitSpin 2.8s linear infinite;
 }
-@keyframes btnOrbit{to{--btn-a:360deg}}
 .btn--gold{background:var(--gold);color:#100E0B}
 .btn--gold:hover{background:var(--gold-hi)}
 .btn--ghost{border-color:rgba(241,237,230,.34);color:var(--on-dark)}
@@ -953,7 +969,7 @@ button,input,select,textarea{font:inherit;color:inherit}
      Four Steps is deliberately left out — those items are a numbered
      sequence to read down, not cards to interact with individually. */
   .tier,.quote,.portrait,
-  .tiers,.quotes,.form,.cta__copy,
+  .tiers,.quotes,.form,.cta__copy,.cta__shot,
   .alsotile,.plaque,
   .btn,
   .nav__list a,.foot__grid a,.tlink,.cta__meta a{
@@ -976,7 +992,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   .nav__list a,.foot__grid a,.tlink,.cta__meta a{display:inline-block}
 
   .tier:hover,.quote:hover,.portrait:hover,
-  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover,
+  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover,.cta__shot:hover,
   .alsotile:hover,.plaque:hover,
   .btn:hover,
   .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
@@ -1012,7 +1028,7 @@ button,input,select,textarea{font:inherit;color:inherit}
    not motion. */
 @media (prefers-reduced-motion:reduce){
   .tier:hover,.quote:hover,.portrait:hover,
-  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover,
+  .tiers:hover,.quotes:hover,.form:hover,.cta__copy:hover,.cta__shot:hover,
   .alsotile:hover,.plaque:hover,
   .btn:hover,
   .nav__list a:hover,.foot__grid a:hover,.tlink:hover,.cta__meta a:hover{
@@ -1089,12 +1105,18 @@ button,input,select,textarea{font:inherit;color:inherit}
      read as a mistake rather than the intended page-ground effect. */
   background:var(--ink-900);border:1px solid var(--line-dark);
 }
-/* engraved corner ticks, opposite corners only */
-.plaque::before,.plaque::after{
-  content:"";position:absolute;width:20px;height:20px;border:0 solid var(--gold);
+/* Engraved corner ticks, opposite corners only. Both corners are drawn as
+   background lines on a single pseudo-element rather than one each — the
+   orbit ring above needs ::after, and this frees it without changing how
+   the ticks land. */
+.plaque::before{
+  content:"";position:absolute;inset:-1px;pointer-events:none;
+  background:
+    linear-gradient(var(--gold),var(--gold)) 0 0/20px 1px no-repeat,
+    linear-gradient(var(--gold),var(--gold)) 0 0/1px 20px no-repeat,
+    linear-gradient(var(--gold),var(--gold)) 100% 100%/20px 1px no-repeat,
+    linear-gradient(var(--gold),var(--gold)) 100% 100%/1px 20px no-repeat;
 }
-.plaque::before{top:-1px;left:-1px;border-top-width:1px;border-left-width:1px}
-.plaque::after{bottom:-1px;right:-1px;border-bottom-width:1px;border-right-width:1px}
 
 .plaque__brow{justify-content:center;margin-bottom:var(--sp-2)}
 /* Never actually carried a heading treatment before — the h2 in the
@@ -1188,6 +1210,13 @@ button,input,select,textarea{font:inherit;color:inherit}
   .cta__grid > .cta__copy{grid-column:1;grid-row:1}
   .cta__grid > .cta__shot{grid-column:1;grid-row:2}
   .cta__grid > .form{grid-column:2;grid-row:1 / span 2}
+
+  /* contact.html leads with the shot instead. Done by swapping the two
+     rows rather than reordering the markup, because the single-column
+     layout below 901px follows source order and already reads the way
+     it should — moving the elements would have changed mobile too. */
+  .cta__grid--shot-first > .cta__shot{grid-row:1}
+  .cta__grid--shot-first > .cta__copy{grid-row:2}
 }
 
 /* contact.html — the standalone form. Single column: the head tray sits
@@ -1470,86 +1499,7 @@ button,input,select,textarea{font:inherit;color:inherit}
    Repeats the same link at the close of the content. */
 .hero__back--bottom{margin-top:var(--sp-4);margin-bottom:0}
 
+/* The mobile pulse that used to live here is gone: the orbit ring runs on
+   every viewport, so touch devices already get the light and two competing
+   animations on one element just read as noise. */
 
-/* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
-/* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
-/* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
-/* Mobile glowing light effect for cards, trays, boxes, images, and component tiles */
-/* Universal Mobile Glow for cards, trays, boxes, quotes, steps, and images */
-/* Mobile light effect for cards, trays, boxes, quotes, steps, and images */
-@media (max-width: 900px), (hover: none) {
-  /* Standalone image glow */
-  img {
-    box-shadow: 0 0 16px rgba(212, 175, 55, 0.4) !important;
-  }
-
-  /* Target all container elements */
-  .card,
-  .tray,
-  .box,
-  .alsotile,
-  .tier,
-  .four__item,
-  .step,
-  .way,
-  .talent,
-  blockquote,
-  article {
-    position: relative !important;
-    overflow: hidden !important;
-    border: 1px solid rgba(212, 175, 55, 0.4) !important;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.25) !important;
-  }
-
-  /* Elevate text and content above the light overlay */
-  .card > *,
-  .tray > *,
-  .box > *,
-  .alsotile > *,
-  .tier > *,
-  .four__item > *,
-  .step > *,
-  .way > *,
-  .talent > *,
-  blockquote > *,
-  article > * {
-    position: relative !important;
-    z-index: 2 !important;
-  }
-
-  /* Light pulse overlay (sits above background, below text) */
-  .card::before,
-  .tray::before,
-  .box::before,
-  .alsotile::before,
-  .tier::before,
-  .four__item::before,
-  .step::before,
-  .way::before,
-  .talent::before,
-  blockquote::before,
-  article::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: -50% !important;
-    z-index: 1 !important;
-    background: radial-gradient(
-      circle at 50% 50%,
-      rgba(212, 175, 55, 0.35) 0%,
-      transparent 65%
-    ) !important;
-    animation: mobileLightPulse 4s ease-in-out infinite alternate !important;
-    pointer-events: none !important;
-  }
-}
-
-@keyframes mobileLightPulse {
-  0% {
-    opacity: 0.25;
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 0.85;
-    transform: scale(1.1);
-  }
-}
