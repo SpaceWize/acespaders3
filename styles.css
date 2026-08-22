@@ -1475,44 +1475,55 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
 /* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
 /* Mobile glowing light effect for cards, trays, boxes, images, and component tiles */
-@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
-  /* Direct glow for images */
+/* Universal Mobile Glow for cards, trays, boxes, quotes, steps, and images */
+@media (max-width: 900px), (hover: none) {
+  /* Standalone image glow */
   img {
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.35) !important;
   }
 
-  /* Target all card, tray, box, and component containers */
+  /* Target all card containers, quotes, steps, and service blocks */
   .card,
   .tray,
   .box,
   .alsotile,
   .tier,
-  .four__item {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate; /* Creates a clean layer stack for background pseudo-elements */
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+  .four__item,
+  .step,
+  .way,
+  .talent,
+  blockquote,
+  article {
+    position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    border: 1px solid rgba(212, 175, 55, 0.35) !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
   }
 
-  /* Gold pulse ambient background layer */
+  /* Ambient light pulse background layer */
   .card::before,
   .tray::before,
   .box::before,
   .alsotile::before,
   .tier::before,
-  .four__item::before {
-    content: "";
-    position: absolute;
-    inset: -100%;
-    z-index: -1; /* Renders behind card text and action buttons */
+  .four__item::before,
+  .step::before,
+  .way::before,
+  .talent::before,
+  blockquote::before,
+  article::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -100% !important;
+    z-index: -1 !important;
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(212, 175, 55, 0.25) 0%,
+      rgba(212, 175, 55, 0.3) 0%,
       transparent 60%
-    );
-    animation: mobileLightPulse 4s ease-in-out infinite alternate;
-    pointer-events: none;
+    ) !important;
+    animation: mobileLightPulse 4s ease-in-out infinite alternate !important;
+    pointer-events: none !important;
   }
 }
 
@@ -1522,7 +1533,7 @@ button,input,select,textarea{font:inherit;color:inherit}
     transform: scale(0.95);
   }
   100% {
-    opacity: 0.8;
+    opacity: 0.85;
     transform: scale(1.05);
   }
 }
