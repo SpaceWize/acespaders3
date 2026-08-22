@@ -1469,3 +1469,87 @@ button,input,select,textarea{font:inherit;color:inherit}
    with no footer to land on after — landing there felt like a dead end.
    Repeats the same link at the close of the content. */
 .hero__back--bottom{margin-top:var(--sp-4);margin-bottom:0}
+
+
+/* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
+/* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
+/* This is what to remove if the mobile code from gemini fails *//* This is what to remove if the mobile code from gemini fails */
+/* Mobile glowing light effect for cards, trays, boxes, images, and component tiles */
+/* Universal Mobile Glow for cards, trays, boxes, quotes, steps, and images */
+/* Mobile light effect for cards, trays, boxes, quotes, steps, and images */
+@media (max-width: 900px), (hover: none) {
+  /* Standalone image glow */
+  img {
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.4) !important;
+  }
+
+  /* Target all container elements */
+  .card,
+  .tray,
+  .box,
+  .alsotile,
+  .tier,
+  .four__item,
+  .step,
+  .way,
+  .talent,
+  blockquote,
+  article {
+    position: relative !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.25) !important;
+  }
+
+  /* Elevate text and content above the light overlay */
+  .card > *,
+  .tray > *,
+  .box > *,
+  .alsotile > *,
+  .tier > *,
+  .four__item > *,
+  .step > *,
+  .way > *,
+  .talent > *,
+  blockquote > *,
+  article > * {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  /* Light pulse overlay (sits above background, below text) */
+  .card::before,
+  .tray::before,
+  .box::before,
+  .alsotile::before,
+  .tier::before,
+  .four__item::before,
+  .step::before,
+  .way::before,
+  .talent::before,
+  blockquote::before,
+  article::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -50% !important;
+    z-index: 1 !important;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(212, 175, 55, 0.35) 0%,
+      transparent 65%
+    ) !important;
+    animation: mobileLightPulse 4s ease-in-out infinite alternate !important;
+    pointer-events: none !important;
+  }
+}
+
+@keyframes mobileLightPulse {
+  0% {
+    opacity: 0.25;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+}
