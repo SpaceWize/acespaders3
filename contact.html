@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="assets/icons/favicon-192.png">
+<title>Contact Ace — Ace Spaders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wdth,wght@62..125,400..700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0"><defs>
+  <symbol id="i-spade" viewBox="0 0 24 24"><path d="M12 2.2c-.45 1.7-3.05 4.1-5.25 6C4.85 9.85 3.55 11.5 3.55 13.5c0 2.6 1.9 4.35 4.3 4.35 1.3 0 2.4-.5 3.1-1.5-.12 2.35-.9 4.05-2 5.05h6.1c-1.1-1-1.88-2.7-2-5.05.7 1 1.8 1.5 3.1 1.5 2.4 0 4.3-1.75 4.3-4.35 0-2-1.3-3.65-3.2-5.3-2.2-1.9-4.8-4.3-5.25-6Z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14M12.5 6l6 6-6 6"/></symbol>
+</defs></svg>
+
+<!-- Standalone copy of the homepage contact form. Same markup and the same
+     [data-form] hook, so main.js binds validation and the mail-app chooser
+     here exactly as it does on the homepage — no JS changes needed. -->
+<section class="section cta" id="contact" aria-labelledby="contact-h">
+  <div class="wrap contactpage">
+    <a class="hero__back" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg> Back</a>
+
+    <div class="cta__copy contactpage__head">
+      <p class="eyebrow"><svg class="eyebrow__spade" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-spade"></use></svg> How to Access Ace</p>
+      <h2 class="h2" id="contact-h">Meetings are by<br>Appointment Only</h2>
+
+      <dl class="cta__meta">
+        <div><dt>Direct</dt><dd><a href="mailto:info@acespaders.com">info@acespaders.com</a></dd></div>
+        <div><dt>Office</dt><dd>1281 Hornby St · Vancouver, BC V6Z 0G8</dd></div>
+        <div><dt>Reply time</dt><dd>Two business days</dd></div>
+      </dl>
+      <p class="cta__fine">Every application is read by a human, then by Ace's assistant, then reviwed by Ace.</p>
+    </div>
+
+<form class="form" novalidate data-form action="#" method="post">
+    <div class="field">
+      <label for="f-name">Name</label>
+      <input id="f-name" name="name" type="text" autocomplete="name" required
+             data-msg="Add your name." aria-describedby="e-name">
+      <p class="err" id="e-name" data-err></p>
+    </div>
+    <div class="field">
+      <label for="f-email">Email</label>
+      <input id="f-email" name="email" type="email" autocomplete="email" required
+             data-msg="Add an email I can reply to." aria-describedby="e-email">
+      <p class="err" id="e-email" data-err></p>
+    </div>
+    <div class="field">
+      <label for="f-org">Organization</label>
+      <input id="f-org" name="org" type="text" autocomplete="organization">
+      <p class="err" id="e-org" data-err></p>
+    </div>
+    <!-- Checkboxes, not a select: an enquiry is regularly about more than one
+         service, and a single-select silently forces the visitor to drop the
+         rest. Validity is "at least one ticked", which no individual input can
+         express, so main.js validates this as a group via [data-checkgroup]. -->
+    <div class="field field--full">
+      <fieldset class="checks" data-checkgroup data-msg="Pick a door.">
+        <legend>Regarding</legend>
+        <p class="hint" id="hint-door">Choose all that apply</p>
+        <ul class="checks__grid">
+          <li><label class="check"><input type="checkbox" name="door" value="A Meeting" aria-describedby="hint-door e-door"><span>A Meeting</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="A Commitment"><span>A Commitment</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="The Invested Aces Mastermind"><span>The Invested Aces Mastermind</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="All Aces Networking Events"><span>All Aces Networking Events</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="Aces Running Group"><span>Aces Running Group</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="Aces Poker Night"><span>Aces Poker Night</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="Public Speaking"><span>Public speaking</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="Premium Pickup &amp; Transport"><span>Premium pickup &amp; transport</span></label></li>
+          <li><label class="check"><input type="checkbox" name="door" value="Other"><span>Other</span></label></li>
+        </ul>
+        <p class="err" id="e-door" data-err></p>
+      </fieldset>
+    </div>
+    <div class="field field--full">
+      <label for="f-what">Description / Additional Information</label>
+      <textarea id="f-what" name="what" rows="5" required
+                data-msg="Tell me what’s stuck — a sentence is enough."
+                aria-describedby="e-what hint-what"></textarea>
+      <p class="hint" id="hint-what">Give me a brief overview of what you want to discuss or work on.
+</p>
+      <p class="err" id="e-what" data-err></p>
+    </div>
+    <div class="field field--full">
+      <label for="f-when">Desired Follow-Up Timeline</label>
+      <select id="f-when" name="when">
+        <option>I needed to start yesterday</option>
+        <option>As soon as possible</option>
+        <option>At Ace's earliest convenience</option>
+        <option>This week</option>
+        <option>This month</option>
+        <option>This quarter</option>
+        <option>Next quarter</option>
+        <option>I'm not too worried about it</option>
+      </select>
+    </div>
+    <div class="form__foot">
+      <button class="btn btn--gold btn--wide" type="submit">Let's Get Started</button>
+      <p class="form__status" role="status" data-status></p>
+    </div>
+    </form>
+
+  </div>
+</section>
+
+<!-- ══════════════ 11. FOOTER ══════════════ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <span class="brand__mark brand__mark--lg"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-spade"></use></svg></span>
+        <p class="foot__word">ACE SPADERS</p>
+        <blockquote class="foot__quote">"If you're going to suffer, suffer success. I Love Gold and Gold People."</blockquote>
+        <p class="foot__quote-by">- Matthew Ferguson</p>
+
+        <blockquote class="foot__quote">"Understanding people just takes a willingness to Listen."</blockquote>
+        <p class="foot__quote-by">-T. Queen of Hearts</p>
+      </div>
+      <div class="foot__col">
+        <nav class="foot__nav" aria-label="The work">
+          <p class="foot__h">The work</p>
+          <ul>
+            <li><a href="mastermind-membership.html">The Invested Aces Mastermind</a></li>
+            <li><a href="group-activities.html">Ace’s Group Activities</a></li>
+          </ul>
+        </nav>
+
+        <nav class="foot__nav foot__nav--stacked" aria-label="Make Life Better">
+          <p class="foot__h">Make Life Better</p>
+          <ul>
+            <li><a href="https://www.makelifebetter.today" target="_blank" rel="noopener noreferrer">www.makelifebetter.today</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="foot__col">
+        <nav class="foot__nav" aria-label="Also available">
+          <p class="foot__h">Also available</p>
+          <ul>
+            <li><a href="premium-pickup-transport.html">Premium pickup &amp; transport</a></li>
+            <li><a href="public-speaking.html">Public speaking</a></li>
+          </ul>
+        </nav>
+
+        <nav class="foot__nav foot__nav--stacked" aria-label="Aces Group Activities">
+          <p class="foot__h">Aces Group Activities</p>
+          <ul>
+            <li><a href="aces-poker-night.html">Aces Poker Night</a></li>
+            <li><a href="aces-running-group.html">Aces Running Group</a></li>
+            <li><a href="all-aces-networking-events.html">All Aces Networking Events</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="foot__col">
+        <nav class="foot__nav" aria-label="Start">
+          <p class="foot__h">Start</p>
+          <ul>
+            <li><a href="index.html#contact">Apply to the Mastermind</a></li>
+            <li><a href="index.html#contact">Book an Assessment Call</a></li>
+            <li><a href="mailto:info@acespaders.com">info@acespaders.com</a></li>
+          </ul>
+        </nav>
+
+        <nav class="foot__nav foot__nav--stacked" aria-label="My Webmaster">
+          <p class="foot__h">My Webmaster</p>
+          <ul>
+            <li><a href="https://spacewize.github.io/spacewize" target="_blank" rel="noopener noreferrer">spacewize.github.io<wbr>/spacewize</a></li>
+          </ul>
+        </nav>
+
+        <nav class="foot__nav foot__nav--stacked" aria-label="Location">
+          <p class="foot__h">Location</p>
+          <ul>
+            <li><a href="https://www.google.com/maps/search/?api=1&amp;query=1281+Hornby+St%2C+Vancouver%2C+BC+V6Z+0G8" target="_blank" rel="noopener noreferrer">1281 Hornby St, Vancouver, BC</a><span class="foot__addr-note">By appointment only</span></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <div class="foot__base">
+      <p>© <span data-year>2026</span> Ace Spaders. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>

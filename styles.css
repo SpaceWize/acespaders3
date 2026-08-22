@@ -1166,6 +1166,36 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cta__meta dd{margin:0;font-size:var(--fs-sm)}
 .cta__meta a{color:var(--gold-ink);text-decoration:underline;text-underline-offset:.25em}
 .cta__fine{margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--on-light-mute)}
+/* The left column's tray is shorter than the form beside it, which left an
+   empty well underneath. The office shot fills it and doubles as a visual
+   for the address in the tray directly above. */
+.cta__shot{
+  margin-top:var(--sp-3);
+  border:1px solid var(--line-dark);
+  overflow:hidden;
+}
+.cta__shot img{display:block;width:100%;height:auto}
+/* Link out to the standalone copy of this form. */
+.cta__alt{margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--on-light-mute)}
+.cta__alt a{color:var(--gold);text-decoration:underline;text-underline-offset:.25em}
+.cta__alt a:hover{color:var(--gold-hi)}
+/* Two-column only. The form is the tall item, so it spans both rows of
+   column 2 while the tray and the shot stack down column 1 — that puts
+   the shot in the well beside the form rather than below the whole grid.
+   Below 901px the grid is a single column and source order (tray, shot,
+   form) takes over, so these must not apply there. */
+@media (min-width:901px){
+  .cta__grid > .cta__copy{grid-column:1;grid-row:1}
+  .cta__grid > .cta__shot{grid-column:1;grid-row:2}
+  .cta__grid > .form{grid-column:2;grid-row:1 / span 2}
+}
+
+/* contact.html — the standalone form. Single column: the head tray sits
+   above the form rather than beside it, since there is no second column
+   of page content to balance against. */
+.contactpage{max-width:46rem}
+.contactpage__head{margin-top:var(--sp-3)}
+.contactpage .form{margin-top:var(--sp-4)}
 
 /* Its own panel on the black page, so it reads as the thing you act on
    rather than as loose fields on a background. */
