@@ -21,88 +21,94 @@
 <!-- Standalone copy of the homepage contact form. Same markup and the same
      [data-form] hook, so main.js binds validation and the mail-app chooser
      here exactly as it does on the homepage — no JS changes needed. -->
-<section class="section cta" id="contact" aria-labelledby="contact-h">
-  <div class="wrap contactpage">
+<section class="section cta" id="contact" aria-labelledby="cta-h">
+  <div class="wrap cta__grid">
     <a class="hero__back" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"></use></svg> Back</a>
-
-    <div class="cta__copy contactpage__head">
+    <div class="cta__copy">
       <p class="eyebrow"><svg class="eyebrow__spade" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-spade"></use></svg> How to Access Ace</p>
-      <h2 class="h2" id="contact-h">Meetings are by<br>Appointment Only</h2>
-
+      <h2 class="h2" id="cta-h">Meetings are by<br>Appointment Only</h2>
+      
       <dl class="cta__meta">
         <div><dt>Direct</dt><dd><a href="mailto:info@acespaders.com">info@acespaders.com</a></dd></div>
         <div><dt>Office</dt><dd>1281 Hornby St · Vancouver, BC V6Z 0G8</dd></div>
         <div><dt>Reply time</dt><dd>Two business days</dd></div>
       </dl>
       <p class="cta__fine">Every application is read by a human, then by Ace's assistant, then reviwed by Ace.</p>
+      <p class="cta__alt">Rather fill this out on its own page? <a href="contact.html">Open the form on its own page</a>.</p>
     </div>
 
-<form class="form" novalidate data-form action="#" method="post">
-    <div class="field">
-      <label for="f-name">Name</label>
-      <input id="f-name" name="name" type="text" autocomplete="name" required
-             data-msg="Add your name." aria-describedby="e-name">
-      <p class="err" id="e-name" data-err></p>
-    </div>
-    <div class="field">
-      <label for="f-email">Email</label>
-      <input id="f-email" name="email" type="email" autocomplete="email" required
-             data-msg="Add an email I can reply to." aria-describedby="e-email">
-      <p class="err" id="e-email" data-err></p>
-    </div>
-    <div class="field">
-      <label for="f-org">Organization</label>
-      <input id="f-org" name="org" type="text" autocomplete="organization">
-      <p class="err" id="e-org" data-err></p>
-    </div>
-    <!-- Checkboxes, not a select: an enquiry is regularly about more than one
-         service, and a single-select silently forces the visitor to drop the
-         rest. Validity is "at least one ticked", which no individual input can
-         express, so main.js validates this as a group via [data-checkgroup]. -->
-    <div class="field field--full">
-      <fieldset class="checks" data-checkgroup data-msg="Pick a door.">
-        <legend>Regarding</legend>
-        <p class="hint" id="hint-door">Choose all that apply</p>
-        <ul class="checks__grid">
-          <li><label class="check"><input type="checkbox" name="door" value="A Meeting" aria-describedby="hint-door e-door"><span>A Meeting</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="A Commitment"><span>A Commitment</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="The Invested Aces Mastermind"><span>The Invested Aces Mastermind</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="All Aces Networking Events"><span>All Aces Networking Events</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="Aces Running Group"><span>Aces Running Group</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="Aces Poker Night"><span>Aces Poker Night</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="Public Speaking"><span>Public speaking</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="Premium Pickup &amp; Transport"><span>Premium pickup &amp; transport</span></label></li>
-          <li><label class="check"><input type="checkbox" name="door" value="Other"><span>Other</span></label></li>
-        </ul>
-        <p class="err" id="e-door" data-err></p>
-      </fieldset>
-    </div>
-    <div class="field field--full">
-      <label for="f-what">Description / Additional Information</label>
-      <textarea id="f-what" name="what" rows="5" required
-                data-msg="Tell me what’s stuck — a sentence is enough."
-                aria-describedby="e-what hint-what"></textarea>
-      <p class="hint" id="hint-what">Give me a brief overview of what you want to discuss or work on.
+    <figure class="cta__shot">
+      <img src="assets/images/office-burrard-place.jpg" alt="One Burrard Place, the tower beside the Hornby Street office" loading="lazy" width="796" height="818">
+    </figure>
+
+    <!-- Wire `action` to your endpoint (Formspree, Basin, your own handler).
+         Until then the form composes a pre-filled email in the visitor's mail client. -->
+    <form class="form" novalidate data-form action="#" method="post">
+      <div class="field">
+        <label for="f-name">Name</label>
+        <input id="f-name" name="name" type="text" autocomplete="name" required
+               data-msg="Add your name." aria-describedby="e-name">
+        <p class="err" id="e-name" data-err></p>
+      </div>
+      <div class="field">
+        <label for="f-email">Email</label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required
+               data-msg="Add an email I can reply to." aria-describedby="e-email">
+        <p class="err" id="e-email" data-err></p>
+      </div>
+      <div class="field">
+        <label for="f-org">Organization</label>
+        <input id="f-org" name="org" type="text" autocomplete="organization">
+        <p class="err" id="e-org" data-err></p>
+      </div>
+      <!-- Checkboxes, not a select: an enquiry is regularly about more than one
+           service, and a single-select silently forces the visitor to drop the
+           rest. Validity is "at least one ticked", which no individual input can
+           express, so main.js validates this as a group via [data-checkgroup]. -->
+      <div class="field field--full">
+        <fieldset class="checks" data-checkgroup data-msg="Pick a door.">
+          <legend>Regarding</legend>
+          <p class="hint" id="hint-door">Choose all that apply</p>
+          <ul class="checks__grid">
+            <li><label class="check"><input type="checkbox" name="door" value="A Meeting" aria-describedby="hint-door e-door"><span>A Meeting</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="A Commitment"><span>A Commitment</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="The Invested Aces Mastermind"><span>The Invested Aces Mastermind</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="All Aces Networking Events"><span>All Aces Networking Events</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Aces Running Group"><span>Aces Running Group</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Aces Poker Night"><span>Aces Poker Night</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Public Speaking"><span>Public speaking</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Premium Pickup &amp; Transport"><span>Premium pickup &amp; transport</span></label></li>
+            <li><label class="check"><input type="checkbox" name="door" value="Other"><span>Other</span></label></li>
+          </ul>
+          <p class="err" id="e-door" data-err></p>
+        </fieldset>
+      </div>
+      <div class="field field--full">
+        <label for="f-what">Description / Additional Information</label>
+        <textarea id="f-what" name="what" rows="5" required
+                  data-msg="Tell me what’s stuck — a sentence is enough."
+                  aria-describedby="e-what hint-what"></textarea>
+        <p class="hint" id="hint-what">Give me a brief overview of what you want to discuss or work on.
 </p>
-      <p class="err" id="e-what" data-err></p>
-    </div>
-    <div class="field field--full">
-      <label for="f-when">Desired Follow-Up Timeline</label>
-      <select id="f-when" name="when">
-        <option>I needed to start yesterday</option>
-        <option>As soon as possible</option>
-        <option>At Ace's earliest convenience</option>
-        <option>This week</option>
-        <option>This month</option>
-        <option>This quarter</option>
-        <option>Next quarter</option>
-        <option>I'm not too worried about it</option>
-      </select>
-    </div>
-    <div class="form__foot">
-      <button class="btn btn--gold btn--wide" type="submit">Let's Get Started</button>
-      <p class="form__status" role="status" data-status></p>
-    </div>
+        <p class="err" id="e-what" data-err></p>
+      </div>
+      <div class="field field--full">
+        <label for="f-when">Desired Follow-Up Timeline</label>
+        <select id="f-when" name="when">
+          <option>I needed to start yesterday</option>
+          <option>As soon as possible</option>
+          <option>At Ace's earliest convenience</option>
+          <option>This week</option>
+          <option>This month</option>
+          <option>This quarter</option>
+          <option>Next quarter</option>
+          <option>I'm not too worried about it</option>
+        </select>
+      </div>
+      <div class="form__foot">
+        <button class="btn btn--gold btn--wide" type="submit">Let's Get Started</button>
+        <p class="form__status" role="status" data-status></p>
+      </div>
     </form>
 
   </div>
